@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="right"
+    android:descendantFocusability="blocksDescendants">
+
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp">
+            <RelativeLayout
+                android:id="@+id/rl_top"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible">
+                <RelativeLayout
+                    android:padding="@dimen/margin_10"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorAccent1">
+                    <android.support.v7.widget.AppCompatSpinner
+                        android:id="@+id/spinner_topic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:imeOptions="actionNext"
+                        android:popupBackground="@drawable/spinner_background"
+                        android:spinnerMode="dropdown"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/white"/>
+                    <RelativeLayout
+                        android:id="@+id/rl_lang"
+                        android:visibility="gone"
+                        android:layout_toLeftOf="@+id/iv_review"
+                        android:layout_toRightOf="@+id/spinner_topic"
+                        android:layout_centerVertical="true"
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:id="@+id/tv_eng"
+                            android:text="ENG"
+                            android:layout_centerVertical="true"
+                            android:textColor="@color/white"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                        <Switch
+                            android:layout_marginLeft="@dimen/spacing_5dp"
+                            android:layout_toRightOf="@+id/tv_eng"
+                            android:id="@+id/switch_btn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:switchMinWidth="56dp"
+                            android:checked="false"
+                            android:textColor="@color/white"
+                            android:theme="@style/SwitchTheme"
+                            android:textOff="On"
+                            android:textOn="Off"/>
+
+                        <TextView
+                            android:layout_toRightOf="@+id/switch_btn"
+                            android:id="@+id/tv_hindi"
+                            android:text="HIN"
+                            android:layout_centerVertical="true"
+                            android:textColor="@color/clearColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </RelativeLayout>
+
+                    <ImageButton
+                        android:visibility="gone"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentRight="true"
+                        android:id="@+id/iv_review"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@color/transparent"
+                        android:src="@drawable/ic_menu" />
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+
+            <TextView
+                android:id="@+id/try_again_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/rl_top"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="top|center_horizontal"
+                android:text="try Again, tap any where"
+                android:textColor="@color/colorAccent"
+                android:textSize="20sp"
+                android:textStyle="bold|italic"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/no_data_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/rl_top"
+                android:layout_centerInParent="true"
+                android:contentDescription="TODO"
+                android:src="@drawable/nodata"
+                android:visibility="invisible" />
+
+            <RelativeLayout
+                android:id="@+id/rl_ques"
+                android:layout_below="@+id/rl_top"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/viewpager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ProgressBar
+                    android:id="@+id/ans_load"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/av_caf_loader"
+            style="@style/AVLoadingIndicatorView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
+            android:visibility="invisible"
+            app:indicatorColor="@color/colorAccent"
+            app:indicatorName="BallPulseIndicator" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/drawer"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:layout_marginTop="50dp"
+        android:background="@color/white"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:id="@+id/rl_close"
+                android:layout_marginRight="@dimen/spacing_2dp"
+                android:layout_marginTop="@dimen/spacing_2dp"
+                android:layout_width="@dimen/spacing_25dp"
+                android:layout_height="@dimen/spacing_25dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/border_selector"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/iv_close"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/transparent"
+                    android:src="@drawable/ic_close" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_review_ques1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_answer" />
+
+                    <TextView
+                        android:id="@+id/tv_answer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:text="Correct Answer"
+                        android:textColor="@color/md_black_1000"
+                        android:textSize="14sp" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_unanswer" />
+
+                    <TextView
+                        android:id="@+id/tv_not_visit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:text="In-correct \n Answer"
+                        android:textColor="@color/md_black_1000"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_below="@+id/ll_review_ques1"
+                android:id="@+id/ll_review_ques2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="@dimen/spacing_5dp">
+
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ll_review_ques3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/ll_review_ques2"
+                android:orientation="horizontal"
+                android:padding="@dimen/spacing_5dp">
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_option"
+                android:layout_below="@+id/ll_review_ques3"
+                android:layout_marginTop="@dimen/margin_10"
+                android:padding="@dimen/spacing_5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/backColor">
+
+                <android.support.v7.widget.AppCompatSpinner
+                    android:id="@+id/spinner_review"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center"
+                    android:imeOptions="actionNext"
+                    android:popupBackground="@drawable/review_spinner_background"
+                    android:spinnerMode="dropdown"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:backgroundTint="@color/md_black_1000" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:id="@+id/rl_grid"
+                        android:layout_width="@dimen/spacing_40dp"
+                        android:layout_height="@dimen/spacing_40dp"
+                        android:layout_centerHorizontal="true"
+                        android:background="@drawable/app_bg_style"
+                        android:gravity="center">
+
+                        <ImageButton
+                            android:id="@+id/btn_grid"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@color/transparent"
+                            android:padding="@dimen/margin_10"
+                            tools:ignore="ButtonStyle" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rl_list"
+                        android:layout_marginLeft="@dimen/spacing_20dp"
+                        android:layout_width="@dimen/spacing_40dp"
+                        android:layout_height="@dimen/spacing_40dp"
+                        android:layout_centerHorizontal="true"
+                        android:background="@drawable/app_bg_style"
+                        android:gravity="center">
+                        <ImageButton
+                            android:id="@+id/btn_list"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@color/transparent"
+                            android:padding="@dimen/margin_10"
+                            tools:ignore="ButtonStyle" />
+                    </RelativeLayout>
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <GridView
+                android:layout_below="@+id/rl_option"
+                android:id="@+id/question_gridView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginTop="@dimen/margin_10"
+                android:gravity="center"
+                android:horizontalSpacing="10dp"
+                android:numColumns="6"
+                android:scrollbars="none"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="10dp"
+                android:visibility="visible" />
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_below="@+id/rl_option"
+                android:id="@+id/question_listView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginTop="@dimen/margin_10"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="@dimen/spacing_5dp"
+                android:scrollbars="none"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+    </LinearLayout>
+</android.support.v4.widget.DrawerLayout>

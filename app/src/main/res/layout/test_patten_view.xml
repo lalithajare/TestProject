@@ -1,0 +1,55 @@
+<RelativeLayout
+    android:layout_marginTop="@dimen/spacing_5dp"
+    android:id="@+id/rl_test_name"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView
+        android:id="@+id/iv_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_question" />
+
+    <TextView
+        android:id="@+id/tv_test_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reasoning Ability"
+        android:layout_marginLeft="@dimen/margin_10"
+        android:layout_toRightOf="@+id/iv_img"
+        android:textColor="@color/md_black_1000"
+        android:textSize="14sp" />
+    <LinearLayout
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/margin_10"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=":"
+            android:layout_marginRight="@dimen/margin_10"
+            android:textColor="@color/md_black_1000"
+            android:textSize="16sp" />
+        <TextView
+            android:layout_marginLeft="@dimen/margin_10"
+            android:id="@+id/tv_right_mark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+1"
+            android:textColor="@color/answeredColor"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_wrong_mark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-0.25"
+            android:textColor="@color/notAnsweredColor"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</RelativeLayout>

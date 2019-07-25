@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/rl_section_topic"
+    android:padding="@dimen/margin_10"
+    android:background="@drawable/result_section_default"
+    android:layout_marginLeft="@dimen/spacing_5dp"
+    android:layout_marginRight="@dimen/spacing_5dp"
+    android:layout_marginTop="@dimen/margin_10"
+    android:layout_marginBottom="@dimen/margin_10">
+
+    <TextView
+        android:id="@+id/tv_result_section_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="200/200"
+        android:layout_centerVertical="true"
+        android:textColor="@color/md_black_1000"
+        android:textSize="@dimen/text_size_14" />
+
+    <ImageView
+        android:layout_toRightOf="@id/tv_result_section_name"
+        android:id="@+id/iv_section_img"
+        android:layout_marginLeft="@dimen/spacing_5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:src="@drawable/ic_result" />
+
+</RelativeLayout>

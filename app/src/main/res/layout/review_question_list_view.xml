@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/card_ans"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="3dp"
+    app:cardUseCompatPadding="true"
+    app:cardPreventCornerOverlap="false"
+    app:cardBackgroundColor="@android:color/white"
+    android:layout_gravity="center">
+    <RelativeLayout
+        android:padding="@dimen/spacing_5dp"
+        android:id="@+id/rv_ques_list"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="WebViewLayout">
+
+        <RelativeLayout
+            android:id="@+id/rl_option"
+            android:layout_width="@dimen/spacing_30dp"
+            android:layout_height="@dimen/spacing_30dp"
+            android:background="@drawable/not_visit_bg"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tv_no_ques"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="1"
+                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                />
+        </RelativeLayout>
+        <WebView
+            android:layout_marginLeft="@dimen/spacing_5dp"
+            android:layout_toRightOf="@+id/rl_option"
+            android:id="@+id/tv_ques"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

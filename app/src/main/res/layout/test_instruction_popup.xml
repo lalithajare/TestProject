@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <RelativeLayout
+        android:layout_marginTop="@dimen/spacing_15dp"
+        android:id="@+id/rl_view1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/view1"
+            android:layout_width="@dimen/spacing_15dp"
+            android:layout_height="@dimen/spacing_25dp"
+            android:background="@color/colorAccent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/margin_10"
+            android:layout_toRightOf="@+id/view1"
+            android:text="Set Your Test Preference"
+            android:textColor="@color/md_black_1000"
+            android:textSize="@dimen/text_size_18"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tv_top1"
+        android:layout_marginTop="@dimen/margin_10"
+        android:layout_marginLeft="@dimen/spacing_20dp"
+        android:layout_marginRight="@dimen/spacing_20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rl_view1"
+        android:padding="@dimen/spacing_5dp"
+        android:text="@string/modeChange"
+        android:textStyle="bold"
+        android:textColor="@color/md_black_1000"
+        android:textSize="@dimen/text_size_12" />
+
+    <TextView
+        android:layout_marginLeft="@dimen/spacing_20dp"
+        android:layout_marginRight="@dimen/spacing_20dp"
+        android:id="@+id/tv_top2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_top1"
+        android:layout_marginTop="@dimen/spacing_5dp"
+        android:padding="@dimen/spacing_5dp"
+        android:text="@string/modeA"
+        android:textColor="@color/md_black_1000"
+        android:textSize="@dimen/text_size_12" />
+
+    <TextView
+        android:id="@+id/tv_top3"
+        android:layout_marginLeft= "@dimen/spacing_20dp"
+        android:layout_marginRight="@dimen/spacing_20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_top2"
+        android:layout_marginTop="@dimen/margin_10"
+        android:padding="@dimen/spacing_5dp"
+        android:text="@string/modeB"
+        android:textColor="@color/md_black_1000"
+        android:textSize="@dimen/text_size_12" />
+
+    <RadioGroup
+        android:layout_margin="@dimen/margin_10"
+        android:id="@+id/rg_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_top3"
+        android:layout_marginTop="@dimen/margin_10"
+        android:orientation="vertical"
+        android:padding="@dimen/margin_10">
+
+        <RadioButton
+            android:id="@+id/rb_mode_a"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/layout_back_bg"
+            android:focusable="false"
+            android:padding="@dimen/margin_10"
+            android:text="@string/modeAMsg"
+            android:textColor="@color/md_black_1000" />
+
+        <RadioButton
+            android:id="@+id/rb_mode_b"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/margin_10"
+            android:background="@drawable/layout_back_bg"
+            android:checked="false"
+            android:focusable="false"
+            android:padding="@dimen/margin_10"
+            android:paddingLeft="@dimen/margin_10"
+            android:text="@string/modeBMsg"
+            android:textColor="@color/md_black_1000" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btn_save_test"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_below="@+id/rg_mode"
+        android:layout_marginLeft="@dimen/spacing_20dp"
+        android:layout_marginRight="@dimen/spacing_20dp"
+        android:background="@drawable/unlock_back_color"
+        android:layout_marginBottom="@dimen/spacing_15dp"
+        android:text="Save &amp; Continue"
+        android:backgroundTint="@color/colorPrimary"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_size_14" />
+
+</RelativeLayout>

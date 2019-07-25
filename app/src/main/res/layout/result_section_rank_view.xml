@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="100dp"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/spacing_20dp"
+    android:id="@+id/rl_section_rank"
+    android:layout_marginTop="@dimen/spacing_2dp"
+    android:layout_marginBottom="@dimen/spacing_2dp"
+    android:layout_marginRight="@dimen/spacing_2dp">
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tv_rank_mark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-2.0"
+        android:textStyle="bold"
+        android:textColor="@color/md_black_1000"
+        android:textSize="@dimen/text_size_18" />
+
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tv_rank_msg"
+        android:layout_below="@+id/tv_rank_mark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Marks"
+        android:textColor="@color/md_black_1000"
+        android:textSize="@dimen/text_size_18" />
+</RelativeLayout>

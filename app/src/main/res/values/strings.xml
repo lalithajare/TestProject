@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">TestProject</string>
+    <string name="readLess">Read Less</string>
+    <string name="readMore">Read More</string>
+    <string name="modeChange">This test is available with sectional lock pattern timing</string>
+    <string name="modeA">If you select Mode A, you will have to attempt all the sections sequentially only. You cannot switch sections unless the time is over.</string>
+    <string name="modeB">If you select Mode B, you can switch and toggle within all the available sections within the total time alloted for the test.</string>
+    <string name="modeAMsg">Mode A (Actual Exam Setting)</string>
+    <string name="modeBMsg">Mode B (User Friendly Setting)</string>
+    <string name="change"><u>Change</u></string>
+    <string name="viewSolution">View Solution</string>
+    <string name="overAllAnalysis">Overall Analysis</string>
+    <string name="shareUrResult">Share Your Result</string>
+    <string name="viewAll">View All</string>
+    <string name="sectionAnalysis">Sectional Analysis</string>
+    <string name="topRankers">Top Rankers</string>
+    <string name="send">Send</string>
+    <string-array name="lang_arrays">
+        <item>English</item>
+    </string-array>
+    <string name="feedBackMsg">Feedback Help us get better</string>
+    <string name="rateMsg">Please rate your test experience?</string>
+    <string name="attemptAgain">Attempt Again</string>
+    <string name="timeSpent">Time Spent</string>
+    <string name="yourRank">Your Rank</string>
+    <string name="youScored">You Scored</string>
+    <string name="name">Name</string>
+    <string name="scoreCard">Score Card</string>
+
+</resources>

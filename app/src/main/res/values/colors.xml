@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#074f8f</color>
+    <color name="colorPrimaryDark">#043560</color>
+    <color name="colorAccent">#074f8f</color>
+    <color name="transparent">#00ffffff</color>
+    <color name="white">#FFFFFF</color>
+    <color name="clearColor">#B9BBBB</color>
+    <color name="md_black_1000">#000000</color>
+    <color name="callColor">#2691FC</color>
+    <color name="saveColor">#2EA330</color>
+    <color name="planColor1">#f5df4a00</color>
+    <color name="planColor2">#F5FF6C27</color>
+    <color name="backColor">#e5e6e4</color>
+    <color name="colorAccent1">#507596</color>
+    <color name="answeredColor">#2C882F</color>
+    <color name="notAnsweredColor">#CA392E</color>
+    <color name="md_deep_orange_700">#E64A19</color>
+    <color name="markedColor">#F0C443</color>
+    <color name="md_grey_300">#edebeb</color>
+    <color name="md_grey_400">#BDBDBD</color>
+    <color name="md_blue_grey_400">#78909C</color>
+    <color name="md_green_400">#66BB6A</color>
+    <color name="md_red_400">#EF5350</color>
+    <color name="skipColor">#CECECE</color>
+    <color name="tabTextColor">#a7a5a5</color>
+
+</resources>
