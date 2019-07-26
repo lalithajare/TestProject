@@ -1,11 +1,5 @@
 package com.example.testproject.database.operators;
 
-import android.arch.persistence.room.Entity;
-
-import com.example.testproject.Model.CoursesSetterGetter;
-import com.example.testproject.database.models.Course;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public interface OperationCompleteListener {

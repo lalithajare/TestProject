@@ -105,7 +105,7 @@ public class CategoryDBOperator {
 
 
     @SuppressLint("StaticFieldLeak")
-    public void searchForCourse(String courseId) {
+    public void searchForCategory(String categoryId) {
         new AsyncTask<String, Void, Category>() {
             @Override
             protected Category doInBackground(String... ids) {
@@ -117,6 +117,23 @@ public class CategoryDBOperator {
             protected void onPostExecute(Category result) {
                 super.onPostExecute(result);
                 mHelper.onItemSearched(result);
+            }
+        }.execute(categoryId);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public void searchForCategoryListByCourseId(String courseId) {
+        new AsyncTask<String, Void, List<Category>>() {
+            @Override
+            protected List<Category> doInBackground(String... ids) {
+                List<Category> result = MyApplication.getAppInstance().getDbInstance().getCategoryDAO().getCategoryListByCourseId(ids[0]);
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(List<Category> result) {
+                super.onPostExecute(result);
+                mHelper.onItemListSearched(result);
             }
         }.execute(courseId);
     }

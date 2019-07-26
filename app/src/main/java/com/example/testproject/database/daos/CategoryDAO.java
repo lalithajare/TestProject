@@ -3,6 +3,7 @@ package com.example.testproject.database.daos;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
@@ -21,10 +22,14 @@ public interface CategoryDAO {
     @Query("SELECT * FROM category WHERE category_id =:categoryId")
     public Category getCategoryById(String categoryId);
 
+
+    @Query("SELECT * FROM category WHERE course_id =:courseId")
+    public List<Category> getCategoryListByCourseId(String courseId);
+
     @Insert
     public Long insertCategory(Category category);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public Long[] insertCategories(List<Category> categories);
 
     @Update

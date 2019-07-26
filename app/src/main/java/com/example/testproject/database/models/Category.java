@@ -2,6 +2,7 @@ package com.example.testproject.database.models;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
@@ -9,6 +10,7 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "category")
 public class Category {
 
+    @OnConflictStrategy()
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "local_category_id")
     private int localCategoryId;
