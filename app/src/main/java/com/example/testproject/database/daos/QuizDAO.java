@@ -1,5 +1,6 @@
 package com.example.testproject.database.daos;
 
+import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
@@ -9,6 +10,7 @@ import com.example.testproject.database.models.Quiz;
 
 import java.util.List;
 
+@Dao
 public interface QuizDAO {
 
     @Query("SELECT * FROM quiz")
@@ -22,7 +24,7 @@ public interface QuizDAO {
     public Long insertQuiz(Quiz quiz);
 
     @Insert
-    public Long insertQuizes(List<Quiz> quiz);
+    public void insertQuizes(List<Quiz> quiz);
 
     @Update
     public int updateQuiz(Quiz quiz);

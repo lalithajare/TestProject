@@ -2,6 +2,7 @@ package com.example.testproject.database.models;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -12,6 +13,7 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "question")
 public class Question {
 
+    @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "local_question_id")
     private int localQuestionId;
 

@@ -2,12 +2,12 @@ package com.example.testproject.common;
 
 import android.app.Application;
 
-import com.example.testproject.database.TestDatabase;
+import com.example.testproject.database.ExamDatabase;
 
 public class MyApplication extends Application {
 
     private static MyApplication appInstance;
-    private static TestDatabase dbInstance;
+    private static ExamDatabase dbInstance;
 
     public static MyApplication getAppInstance() {
         if (appInstance == null) {
@@ -18,7 +18,7 @@ public class MyApplication extends Application {
         return appInstance;
     }
 
-    public static TestDatabase getDbInstance() {
+    public ExamDatabase getDbInstance() {
         return dbInstance;
     }
 
@@ -26,7 +26,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         appInstance = this;
-        dbInstance =TestDatabase.getDatabase(this);
+        dbInstance = ExamDatabase.getDatabase(this);
     }
 
 }

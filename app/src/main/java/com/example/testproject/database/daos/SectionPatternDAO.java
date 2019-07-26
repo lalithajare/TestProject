@@ -1,5 +1,6 @@
 package com.example.testproject.database.daos;
 
+import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
@@ -11,13 +12,14 @@ import com.example.testproject.database.models.SectionPattern;
 
 import java.util.List;
 
+@Dao
 public interface SectionPatternDAO {
 
     @Query("SELECT * FROM section_pattern")
     public List<SectionPattern> getSectionPatternList();
 
     @Query("SELECT * FROM section_pattern WHERE quiz_id =:quizId")
-    public Quiz getSectionPatternById(String quizId);
+    public SectionPattern getSectionPatternById(String quizId);
 
 
     @Insert
@@ -25,7 +27,7 @@ public interface SectionPatternDAO {
 
 
     @Insert
-    public Long insertSectionPatternList(List<SectionPattern> sectionPattern);
+    public void insertSectionPatternList(List<SectionPattern> sectionPattern);
 
     @Update
     public int updateSectionPattern(SectionPattern sectionPattern);

@@ -1,5 +1,6 @@
 package com.example.testproject.database.daos;
 
+import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
@@ -10,19 +11,20 @@ import com.example.testproject.database.models.QuizDetails;
 
 import java.util.List;
 
+@Dao
 public interface QuizDetailsDAO {
     @Query("SELECT * FROM quiz_details")
-    public List<Quiz> getQuizDetailsList();
+    public List<QuizDetails> getQuizDetailsList();
 
     @Query("SELECT * FROM quiz_details WHERE local_quiz_detail_id =:quizDetailsId")
-    public Quiz getQuizDetailsById(String quizDetailsId);
+    public QuizDetails getQuizDetailsById(String quizDetailsId);
 
 
     @Insert
     public Long insertQuizDetails(QuizDetails quizDetails);
 
     @Insert
-    public Long insertQuizDetailsList(List<QuizDetails> quizDetails);
+    public void insertQuizDetailsList(List<QuizDetails> quizDetails);
 
     @Update
     public int updateQuizDetails(QuizDetails quizDetails);

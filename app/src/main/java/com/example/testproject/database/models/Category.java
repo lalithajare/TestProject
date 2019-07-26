@@ -11,7 +11,7 @@ public class Category {
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "local_category_id")
-    private String localCategoryId;
+    private int localCategoryId;
 
     @ColumnInfo(name = "category_id")
     @SerializedName("category_id")
@@ -102,19 +102,19 @@ public class Category {
         this.previousYearTest = previousYearTest;
     }
 
-    public String getLocalCategoryId() {
-        return localCategoryId;
-    }
-
-    public void setLocalCategoryId(String localCategoryId) {
-        this.localCategoryId = localCategoryId;
-    }
-
     public String getCourseId() {
         return courseId;
     }
 
     public void setCourseId(String courseId) {
         this.courseId = courseId;
+    }
+
+    public int getLocalCategoryId() {
+        return localCategoryId;
+    }
+
+    public void setLocalCategoryId(int localCategoryId) {
+        this.localCategoryId = localCategoryId;
     }
 }

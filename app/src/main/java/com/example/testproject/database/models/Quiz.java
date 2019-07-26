@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 public class Quiz {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "local_quiz_id")
-    private String localQuizId;
+    private int localQuizId;
 
     @ColumnInfo(name = "category_id")
     @SerializedName("category_id")
@@ -63,14 +63,6 @@ public class Quiz {
     @ColumnInfo(name = "student_buy_plan_status")
     @SerializedName("student_buy_plan_status")
     private int studentBuyPlanStatus;
-
-    public String getLocalQuizId() {
-        return localQuizId;
-    }
-
-    public void setLocalQuizId(String localQuizId) {
-        this.localQuizId = localQuizId;
-    }
 
     public String getQuizId() {
         return quizId;
@@ -174,5 +166,13 @@ public class Quiz {
 
     public void setCategoryId(String categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public int getLocalQuizId() {
+        return localQuizId;
+    }
+
+    public void setLocalQuizId(int localQuizId) {
+        this.localQuizId = localQuizId;
     }
 }

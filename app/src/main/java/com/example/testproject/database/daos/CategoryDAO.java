@@ -1,5 +1,6 @@
 package com.example.testproject.database.daos;
 
+import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
@@ -10,6 +11,7 @@ import com.example.testproject.database.models.Course;
 
 import java.util.List;
 
+@Dao
 public interface CategoryDAO {
 
 
@@ -23,7 +25,7 @@ public interface CategoryDAO {
     public Long insertCategory(Category category);
 
     @Insert
-    public Long insertCategories(List<Category> categories);
+    public Long[] insertCategories(List<Category> categories);
 
     @Update
     public int updateCategory(Category category);
