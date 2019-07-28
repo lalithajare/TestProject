@@ -156,8 +156,4 @@ public class CategoryDBOperator {
         }.execute();
     }
 
-    public abstract class CourseDBOpsHelper implements OperationCompleteListener {
-
-
-    }
 }

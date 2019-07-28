@@ -41,11 +41,11 @@ public class CategoryDBUseCases {
         mHelper = helper;
     }
 
-    private Category getCategoryFromString(String jsonObject) {
+    public Category getCategoryFromString(String jsonObject) {
         return mGson.fromJson(jsonObject, Category.class);
     }
 
-    private List<Category> getCategoriesFromString(String jsonObject) {
+    public List<Category> getCategoriesFromString(String jsonObject) {
         return mGson.fromJson(jsonObject, new TypeToken<List<Category>>() {
         }.getType());
     }
@@ -63,26 +63,7 @@ public class CategoryDBUseCases {
         mOperator.searchForCategoryList();
     }
 
-    public void checkIfCategoriesExistAndAdd(String jsonObject,String courseId) {
-
-//        CourseDBOperator courseDBOperator = new CourseDBOperator(new DBOperationsHelper() {
-//
-//            @Override
-//            public <T> void onItemListSearched(List<T> list) {
-//                super.onItemListSearched(list);
-//
-//                for (T item : list) {
-//                    Course course = (Course) item;
-//                    callCategoryForCourseAPI(course);
-//                }
-//
-//            }
-//        });
-//        courseDBOperator.searchForCourseList();
-
-
-        final List<Category> categoryListToAdd = getCategoriesFromString(jsonObject);
-
+    public void checkIfCategoriesExistAndAdd(List<Category> categoryListToAdd,String courseId) {
         for(Category category : categoryListToAdd){
             category.setCourseId(courseId);
         }
@@ -97,42 +78,6 @@ public class CategoryDBUseCases {
         });
         mOperator.addAllCategories(categoryListToAdd);
     }
-
-    private void callCategoryForCourseAPI(final Course course) {
-        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_TEST, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject object = new JSONObject(response);
-                    String status = object.getString("status_code");
-                    String message = object.getString("message");
-                    Log.e("onResponse: ", status);
-                    if (status.equalsIgnoreCase("200")) {
-                        JSONArray jsonArray = object.getJSONArray("question_list");
-
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new Hashtable<>();
-                params.put("exam_id", course.getCourseId());
-                Log.d("FullTest", "getParams: " + params);
-                return params;
-            }
-        };
-
-        request.setRetryPolicy(new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        AppWebService.getInstance(MyApplication.getAppInstance()).addToRequestQueue(request);
-    }
-
 
     public void getCategoryListByCourseIdUsecase(String courseId) {
         mOperator = new CategoryDBOperator(mHelper);

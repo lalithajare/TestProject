@@ -41,7 +41,50 @@
         android:id="@+id/free_test_recycle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/relPendingTest"
         android:layout_below="@+id/actionbar_layout"
         android:layout_marginTop="10dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@+id/relPendingTest"
+        android:layout_alignParentBottom="true"
+        android:background="@color/md_grey_300" />
+
+    <RelativeLayout
+        android:id="@+id/relPendingTest"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:padding="@dimen/spacing_20dp">
+
+        <TextView
+            android:id="@+id/txtPendingTestName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SSC TEST 1 (A)"
+            android:textSize="@dimen/text_size_16" />
+
+        <TextView
+            android:id="@+id/txtTimerValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtPendingTestName"
+            android:text="PAUSED AT : 00:23:44"
+            android:textSize="@dimen/text_size_12" />
+
+        <ImageView
+            android:id="@+id/imgResume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/spacing_5dp"
+            android:src="@android:drawable/ic_media_next" />
+
+    </RelativeLayout>
 
 </RelativeLayout>

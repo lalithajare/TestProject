@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -23,6 +24,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +39,7 @@ import com.example.testproject.Model.CoursesSetterGetter;
 import com.example.testproject.Model.QuizTopic;
 import com.example.testproject.R;
 import com.example.testproject.URLs.UrlsAvision;
+import com.example.testproject.Utils.AppPreferenceManager;
 import com.example.testproject.Utils.AppWebService;
 import com.example.testproject.Utils.UtilFunctions;
 import com.example.testproject.database.DatabaseInitizationService;
@@ -66,6 +69,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button btnSync;
     ArrayList<QuizTopic> fullTestTopics = new ArrayList<>();
 
+    RelativeLayout relPendingTest;
+    TextView txtPendingTestName;
+    TextView txtTimerValue;
+
+    Bundle offlineValues;
+
+
     //DB operations
     CourseDBUseCases mCourseDBUseCases;
     CategoryDBUseCases mCategoryDBUseCases;
@@ -73,8 +83,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
+        public void onServiceConnected(ComponentName name, IBinder iBinder) {
             UtilFunctions.showToast("Service connected");
+            DatabaseInitizationService.LocalBinder localBinder = (DatabaseInitizationService.LocalBinder) iBinder;
+            mDatabaseInitizationService = localBinder.getService();
         }
 
         @Override
@@ -87,6 +99,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        offlineValues = AppPreferenceManager.getOfflineValues();
+
+        relPendingTest = findViewById(R.id.relPendingTest);
+        txtPendingTestName = findViewById(R.id.txtPendingTestName);
+        txtTimerValue = findViewById(R.id.txtTimerValue);
 
         spinner_exam = findViewById(R.id.spinner_exam);
         btnSync = findViewById(R.id.btnSync);
@@ -97,14 +114,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ViewCompat.setNestedScrollingEnabled(recyclerView, false);
         pref = getSharedPreferences("ActivityPREF", Context.MODE_PRIVATE);
         editor = pref.edit();
-        editor.commit();
+        editor.apply();
 //        if (InternetCheck.isInternetOn(this)) {
         getExamTopic();
 //        } else {
 //            Toast.makeText(this, "No internet", Toast.LENGTH_SHORT).show();
 //        }
 
+        /*if (AppPreferenceManager.getExam() != null) {
+            relPendingTest.setVisibility(View.VISIBLE);
+        } else {
+            relPendingTest.setVisibility(View.GONE);
+        }*/
+
         btnSync.setOnClickListener(this);
+        relPendingTest.setOnClickListener(this);
     }
 
     private void getExamTopic() {
@@ -359,8 +383,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         mCategoryDBUseCases.getCategoryListByCourseIdUsecase(courseId);
-
-
     }
 
     private void setQuizTopicAdapter() {
@@ -377,6 +399,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Intent startIntent = new Intent(MainActivity.this, DatabaseInitizationService.class);
                 startService(startIntent);
                 bindService(startIntent, mServiceConnection, 0);
+                break;
+
+            case R.id.relPendingTest:
+
+                String testType = offlineValues.getString("testType");
+                if (TextUtils.equals(testType, FullTestQuizActivity.class.getSimpleName())) {
+                    Intent intent = new Intent(this, FullTestQuizActivity.class);
+                    intent.putExtra("is_from_home", true);
+                    startActivity(intent);
+                }
                 break;
         }
     }

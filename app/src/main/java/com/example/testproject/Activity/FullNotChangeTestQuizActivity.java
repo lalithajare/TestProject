@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -17,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -42,6 +44,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -59,7 +62,9 @@ import com.example.testproject.URLs.UrlsAvision;
 import com.example.testproject.Utils.AppWebService;
 import com.example.testproject.Utils.Const;
 
+import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.InternetCheck;
+import com.example.testproject.database.SyncApiCallManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,6 +79,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class FullNotChangeTestQuizActivity extends AppCompatActivity {
+    private static final String TAG = FullNotChangeTestQuizActivity.class.getSimpleName();
     ViewPager viewPager;
     private ImageView noDataImage;
     private TextView tryAgainText;
@@ -85,32 +91,40 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
     SimpleDateFormat df;
     Calendar c;
     private String currentTime;
-    CountDownTimer countDownTimer;
     Context context;
     private ArrayList<FullQuestionSetGet> quesList;
     private ArrayList<AnswerSetGet> ansList;
     HashMap<String, ArrayList<AnswerSetGet>> listHashMap;
     RelativeLayout rl_top;
-    ImageButton iv_review,iv_close;
+    ImageButton iv_review, iv_close;
     BigGridReviewAdapter gridReviewAdapter;
     BigRecycleReviewAdapter listReviewAdapter;
     GridView question_gridView;
     ImageButton iv_play;
     public DrawerLayout drawerLayout;
-    public  View drawerView;
+    public View drawerView;
     RecyclerView question_listView;
     ImageButton btn_grid, btn_list;
-    RelativeLayout rl_grid, rl_list,rl_ques;
+    RelativeLayout rl_grid, rl_list, rl_ques;
 
     Switch switch_btn;
-    TextView tv_eng,tv_hindi;
-    Spinner spinner_topic,spinner_review;
+    TextView tv_eng, tv_hindi;
+    Spinner spinner_topic, spinner_review;
     ArrayList<FullTopicTest> topicList = new ArrayList<>();
     private ArrayList<String> strings = new ArrayList<>();
     ArrayAdapter<String> adapter;
     RelativeLayout rl_close;
     RelativeLayout rl_view_marked;
     TextView tv_total_time;
+
+    //Added Later
+    AlertDialog mOfflineAttemptsDialogue;
+    Button btnPause;
+    Button btnSubmitAll;
+    CustomCountDownTimer customCountDownTimer;
+    ArrayList<Hashtable<String, String>> attemptedOfflineQuestions = new ArrayList<>();
+
+
     @SuppressLint("SimpleDateFormat")
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -118,9 +132,14 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_test_quiz);
         context = FullNotChangeTestQuizActivity.this;
+
+        //Added Later
+        btnPause = findViewById(R.id.btnPause);
+        btnSubmitAll = findViewById(R.id.btnSubmitAll);
+
         answerLoad = findViewById(R.id.ans_load);
         tv_total_time = findViewById(R.id.tv_total_time);
-        iv_review=findViewById(R.id.iv_review);
+        iv_review = findViewById(R.id.iv_review);
         totalQuestion = findViewById(R.id.text_no_of_question);
         finishButton = findViewById(R.id.test_finish_button);
         submitButton = findViewById(R.id.submit_ans);
@@ -132,26 +151,26 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         markButton.setVisibility(View.GONE);
         submitButton.setVisibility(View.GONE);
         //clearButton.setVisibility(View.GONE);
-        iv_play=findViewById(R.id.iv_play);
+        iv_play = findViewById(R.id.iv_play);
         question_gridView = findViewById(R.id.question_gridView);
         drawerLayout = findViewById(R.id.drawer_layout);
         drawerView = findViewById(R.id.drawer);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        iv_review=findViewById(R.id.iv_review);
-        iv_close=findViewById(R.id.iv_close);
-        switch_btn=findViewById(R.id.switch_btn);
-        tv_eng=findViewById(R.id.tv_eng);
-        tv_hindi=findViewById(R.id.tv_hindi);
-        question_listView=findViewById(R.id.question_listView);
-        btn_grid=findViewById(R.id.btn_grid);
-        btn_list=findViewById(R.id.btn_list);
-        rl_grid=findViewById(R.id.rl_grid);
-        rl_list=findViewById(R.id.rl_list);
+        iv_review = findViewById(R.id.iv_review);
+        iv_close = findViewById(R.id.iv_close);
+        switch_btn = findViewById(R.id.switch_btn);
+        tv_eng = findViewById(R.id.tv_eng);
+        tv_hindi = findViewById(R.id.tv_hindi);
+        question_listView = findViewById(R.id.question_listView);
+        btn_grid = findViewById(R.id.btn_grid);
+        btn_list = findViewById(R.id.btn_list);
+        rl_grid = findViewById(R.id.rl_grid);
+        rl_list = findViewById(R.id.rl_list);
         spinner_topic = findViewById(R.id.spinner_topic);
-        spinner_review=findViewById(R.id.spinner_review);
-        rl_ques=findViewById(R.id.rl_ques);
-        rl_close=findViewById(R.id.rl_close);
-        rl_view_marked=findViewById(R.id.rl_view_marked);
+        spinner_review = findViewById(R.id.spinner_review);
+        rl_ques = findViewById(R.id.rl_ques);
+        rl_close = findViewById(R.id.rl_close);
+        rl_view_marked = findViewById(R.id.rl_view_marked);
         c = Calendar.getInstance();
         df = new SimpleDateFormat("HH:mm:ss");
         currentTime = df.format(c.getTime());
@@ -162,27 +181,27 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         markButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (markButton.getText().toString().equalsIgnoreCase("Mark for Review")){
+                if (markButton.getText().toString().equalsIgnoreCase("Mark for Review")) {
                     if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
                         Const.hashMapSelectMarkReview.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
                         Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
                         Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
 
-                    }else {
+                    } else {
                         Const.hashMapMarkSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
                         Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
 
                     }
                     markButton.setText("Mark for\n Review");
                     rl_view_marked.setVisibility(View.VISIBLE);
-                }else {
-                    if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
+                } else {
+                    if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
                         Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
                         Const.hashMapSelectMarkReview.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(),true);
+                        Const.hashMapSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
                         markButton.setText("Mark for Review");
                         rl_view_marked.setVisibility(View.GONE);
-                    }else {
+                    } else {
                         Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
                         Const.hashMapSelectMarkReview.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
                         Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
@@ -196,17 +215,16 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         });
         switch_btn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
+                if (isChecked) {
                     tv_hindi.setTextColor(getResources().getColor(R.color.white));
                     tv_eng.setTextColor(getResources().getColor(R.color.clearColor));
 
-                }else {
+                } else {
                     tv_eng.setTextColor(getResources().getColor(R.color.white));
                     tv_hindi.setTextColor(getResources().getColor(R.color.clearColor));
                 }
             }
         });
-
 
 
         iv_close.setOnClickListener(new View.OnClickListener() {
@@ -236,7 +254,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                 question_gridView.setAdapter(gridReviewAdapter);
 
                 listReviewAdapter = new BigRecycleReviewAdapter(context, quesList);
-                question_listView.setLayoutManager(new LinearLayoutManager(getApplicationContext(),LinearLayout.VERTICAL,false));
+                question_listView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayout.VERTICAL, false));
                 question_listView.setAdapter(listReviewAdapter);
             }
         });
@@ -287,29 +305,40 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
 
         if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
             setTopicLayout();
-        }else {
+        } else {
             Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
         }
 
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (TextUtils.equals(btnPause.getText(), "Pause")) {
+                    if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
+                        if (markButton.getText().toString().equalsIgnoreCase("Mark for\n Review")
+                                && Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
+                            Const.hashMapSelectMarkReview.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
+                            Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
+                            Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
 
-                if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
-                    if (markButton.getText().toString().equalsIgnoreCase("Mark for\n Review")
-                            && Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
-                        Const.hashMapSelectMarkReview.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
-                        Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-
-                    }else {
-                        Const.hashMapSelectMarkReview.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
+                        } else {
+                            Const.hashMapSelectMarkReview.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
+                            Const.hashMapSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
+                        }
+                        callSubmitAnswerAPI();
+                    } else {
+                        Hashtable<String, String> params = new Hashtable<>();
+                        params.put("test_id", Const.STUDENT_TEST_ID);
+                        params.put("qus_id", Const.CHOOSE_QUESTION_ID);
+                        params.put("answers_id", Const.ANSWER_ID);
+                        params.put("question_status", "1");
+                        attemptedOfflineQuestions.add(params);
+                        btnSubmitAll.setVisibility(View.VISIBLE);
+                        nextQuestion();
                     }
-                    saveQuiz();
-                }else {
-                    Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "The Test is Paused, please resume it.", Toast.LENGTH_LONG).show();
                 }
+
             }
         });
 
@@ -323,6 +352,48 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
 
+            }
+        });
+
+        //Added Later
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Submitting answers, please wait...");
+        builder.setMessage("Answers to the questions you attempted while being offline are submitted");
+        mOfflineAttemptsDialogue = builder.create();
+        mOfflineAttemptsDialogue.setCancelable(false);
+
+        btnPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (TextUtils.equals(btnPause.getText().toString(), "Pause")) {
+//                    saveTimerValue();
+//                    saveOfflineValues();
+                    btnPause.setText("Resume");
+                    customCountDownTimer.pause();
+                } else {
+                    btnPause.setText("Pause");
+//                    resumeTimerValue();
+//                    resumeWithOfflineValues();
+                    customCountDownTimer.resume();
+                }
+            }
+        });
+
+        btnSubmitAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (TextUtils.equals(btnPause.getText(), "Pause")) {
+                    if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
+                        Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                        mOfflineAttemptsDialogue.show();
+                        submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                        attemptedOfflineQuestions.remove(attempt);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "The Test is Paused, please resume it.", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -360,13 +431,13 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                             @Override
                             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                                 if (spinner_topic.getSelectedItemPosition() < Const.QUIZ_LENGTH) {
-                                    if (submitButton.getVisibility()==View.VISIBLE){
+                                    if (submitButton.getVisibility() == View.VISIBLE) {
                                         submitButton.setVisibility(View.GONE);
                                         submitButton.setText("Save & Next");
                                     }
                                     Const.TOPIC_SIZE = spinner_topic.getAdapter().getCount();
 
-                                    Const.TOPIC_NAME=topicList.get(position).full_length_type_name;
+                                    Const.TOPIC_NAME = topicList.get(position).full_length_type_name;
                                     Const.TEST_TIME = topicList.get(position).full_length_duration;
                                     Const.TYPE_ID = topicList.get(position).full_length_type_id;
                                     getFullNotChangeTestQues();
@@ -381,7 +452,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                         });
 
 
-                    }else {
+                    } else {
                         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                         spinner_topic.setVisibility(View.GONE);
                         // av_caf_loader.hide();
@@ -408,7 +479,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                 params.put("quiz_id", getIntent().getStringExtra("quiz_id"));
                 params.put("student_id", "6");
                 params.put("start_time", currentTime);
-                params.put("remaining_time","0" /*getIntent().getStringExtra("remain_time")*/);
+                params.put("remaining_time", "0" /*getIntent().getStringExtra("remain_time")*/);
                 Log.d("FullLength", "getParams: " + params);
                 return params;
             }
@@ -422,7 +493,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         tryAgainText.setVisibility(View.GONE);
         markButton.setVisibility(View.GONE);
 
-        final Dialog dialog=new Dialog(context);
+        final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.full_screen_progress_bar);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -470,28 +541,28 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                             }
                             listHashMap.put(questionSetGet.getTest_question_id(), ansList);
                         }
-                        FullNotChangeTestAdapter quizTestPageAdapter = new FullNotChangeTestAdapter(getApplicationContext(), quesList, listHashMap,submitButton);
+                        FullNotChangeTestAdapter quizTestPageAdapter = new FullNotChangeTestAdapter(getApplicationContext(), quesList, listHashMap, submitButton);
                         viewPager.setAdapter(quizTestPageAdapter);
 
                         startTimer(Float.parseFloat(Const.TEST_TIME));
 
                         totalQuestion.setText(1 + "/" + listHashMap.size());
-                        if (Const.hashMapMarkSelected.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
+                        if (Const.hashMapMarkSelected.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
                             markButton.setText("Mark for\n Review");
                             rl_view_marked.setVisibility(View.VISIBLE);
-                        }else if (Const.hashMapSelectMarkReview.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
+                        } else if (Const.hashMapSelectMarkReview.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
                             markButton.setText("Mark for\n Review");
                             rl_view_marked.setVisibility(View.VISIBLE);
                         }/*else if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
                             clearButton.setText("Clear\n Selection");
                             clearButton.setTextColor(Color.parseColor("#FFFFFF"));
-                        }*/else {
+                        }*/ else {
                             markButton.setText("Mark for Review");
                             rl_view_marked.setVisibility(View.GONE);
                             // clearButton.setText("Clear Selection");
                             //  clearButton.setTextColor(Color.parseColor("#B9BBBB"));
                         }
-                        Const.TOTAL_QUIZ_QUES= String.valueOf(messageJsonArray.length());
+                        Const.TOTAL_QUIZ_QUES = String.valueOf(messageJsonArray.length());
 
                         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                             @Override
@@ -503,27 +574,27 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                             @Override
                             public void onPageSelected(int position) {
                                 if (position == 0) {
-                                    if (Const.hashMapMarkSelected.containsKey(quesList.get(position).getTest_question_id())){
+                                    if (Const.hashMapMarkSelected.containsKey(quesList.get(position).getTest_question_id())) {
                                         markButton.setText("Mark for\n Review");
                                         rl_view_marked.setVisibility(View.VISIBLE);
-                                    }else if (Const.hashMapSelectMarkReview.containsKey(quesList.get(position).getTest_question_id())){
+                                    } else if (Const.hashMapSelectMarkReview.containsKey(quesList.get(position).getTest_question_id())) {
                                         markButton.setText("Mark for\n Review");
                                         rl_view_marked.setVisibility(View.VISIBLE);
                                     }/*else if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
                                         clearButton.setText("Clear\n Selection");
                                         clearButton.setTextColor(Color.parseColor("#FFFFFF"));
-                                    }*/  else {
+                                    }*/ else {
                                         markButton.setText("Mark for Review");
                                         rl_view_marked.setVisibility(View.GONE);
                                         //clearButton.setText("Clear Selection");
                                         //clearButton.setTextColor(Color.parseColor("#B9BBBB"));
                                     }
 
-                                }else {
-                                    if (Const.hashMapMarkSelected.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
+                                } else {
+                                    if (Const.hashMapMarkSelected.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
                                         markButton.setText("Mark for\n Review");
                                         rl_view_marked.setVisibility(View.VISIBLE);
-                                    }else if (Const.hashMapSelectMarkReview.containsKey(quesList.get(position).getTest_question_id())){
+                                    } else if (Const.hashMapSelectMarkReview.containsKey(quesList.get(position).getTest_question_id())) {
                                         markButton.setText("Mark for\n Review");
                                         rl_view_marked.setVisibility(View.VISIBLE);
                                     }/*else if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
@@ -546,7 +617,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
 
                                 totalQuestion.setText(position + 1 + "/" + listHashMap.size());
                                 submitButton.setVisibility(View.GONE);
-                                Const.QUES_STATUS="0";
+                                Const.QUES_STATUS = "0";
                                 //clearButton.setEnabled(false);
                                 // clearButton.setTextColor(Color.parseColor("#B9BBBB"));
 
@@ -562,7 +633,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                         question_gridView.setAdapter(gridReviewAdapter);
 
                         listReviewAdapter = new BigRecycleReviewAdapter(context, quesList);
-                        question_listView.setLayoutManager(new LinearLayoutManager(getApplicationContext(),LinearLayout.VERTICAL,false));
+                        question_listView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayout.VERTICAL, false));
                         question_listView.setAdapter(listReviewAdapter);
 
                         question_listView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
@@ -620,6 +691,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
                     }
                     dialog.dismiss();
+                    btnPause.setVisibility(View.VISIBLE);
 
                 } catch (JSONException e) {
                     noDataImage.setVisibility(View.VISIBLE);
@@ -659,7 +731,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
     }
 
     /*============================================Save Answer===========================================*/
-    private void saveQuiz() {
+    private void callSubmitAnswerAPI() {
         answerLoad.setVisibility(View.VISIBLE);
         answerLoad.setClickable(false);
         answerLoad.setIndeterminate(true);
@@ -675,14 +747,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                     Log.e("Result Status", status);
                     if (status.equalsIgnoreCase("200")) {
                         answerLoad.setVisibility(View.GONE);
-                        if (submitButton.getText().toString().equalsIgnoreCase("Save")) {
-                            submitButton.setVisibility(View.GONE);
-
-                        }
-                        if (submitButton.getText().toString().equalsIgnoreCase("Save & Next")) {
-                            viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
-                        }
-
+                        nextQuestion();
                     } else {
                         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
                     }
@@ -704,7 +769,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
-                params.put("test_id",  Const.STUDENT_TEST_ID);
+                params.put("test_id", Const.STUDENT_TEST_ID);
                 params.put("qus_id", Const.CHOOSE_QUESTION_ID);
                 params.put("answers_id", Const.ANSWER_ID);
                 params.put("question_status", "1");
@@ -719,51 +784,40 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         AppWebService.getInstance(this).addToRequestQueue(request);
 
     }
+
     private void startTimer(final float minute) {
-        countDownTimer = new CountDownTimer((long) (60 * minute * 1000), 500) {
-            @SuppressLint({"DefaultLocale", "SetTextI18n"})
+        customCountDownTimer = new CustomCountDownTimer((long) (60 * minute * 1000), 500, true) {
             @Override
-            public void onTick(long leftTimeInMilliseconds) {
-                long seconds = leftTimeInMilliseconds / 1000;
-
+            public void onTick(long millisUntilFinished) {
+                long seconds = millisUntilFinished / 1000;
                 tv_total_time.setText(String.format("%02d", seconds / 3600) + ":" + String.format("%02d", (seconds % 3600) / 60) + ":" + String.format("%02d", seconds % 60));
-
             }
 
-            @SuppressLint({"SetTextI18n", "SimpleDateFormat"})
             @Override
             public void onFinish() {
                 if (tv_total_time.getText().equals("00:00:00")) {
-                    if (spinner_topic.getSelectedItemPosition() == Const.QUIZ_LENGTH - 1) {
-
-                        startActivity(new Intent(context, ResultPannelActivity.class));
-                        countDownTimer.cancel();
-                        Const.answerStoreHash.clear();
-                        Const.answerQuestionStoreHash.clear();
-                        Const.questionAnswerStoreHash.clear();
-                        Const.hashMapSelected.clear();
-                        Const.hashMapMarkSelected.clear();
-                        Const.hashMapSelectMarkReview.clear();
-                        Const.answerCheckHash.clear();
-                        finish();
-                    } else {
-                        if (submitButton.getVisibility()==View.VISIBLE){
-                            submitButton.setVisibility(View.GONE);
-                            submitButton.setText("Save & Next");
-                        }
+                    if (submitButton.getVisibility() == View.VISIBLE) {
                         submitButton.setVisibility(View.GONE);
                         submitButton.setText("Save & Next");
-                        spinner_topic.setSelection(spinner_topic.getSelectedItemPosition() + 1);
+                    }
 
+                    if (attemptedOfflineQuestions.isEmpty()) {
+                        customCountDownTimer.cancel();
+                        callFinishTestAPI();
+                    } else {
+                        Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                        mOfflineAttemptsDialogue.show();
+                        submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                        attemptedOfflineQuestions.remove(attempt);
                     }
                 }
             }
-        }.start();
-
+        };
+        customCountDownTimer.create();
     }
 
 
-    public void finishTest(View view){
+    public void finishTest(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Finish Test");
         builder.setMessage("Are you sure to finish the test?");
@@ -776,8 +830,18 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                 c = Calendar.getInstance();
                 df = new SimpleDateFormat("HH:mm:ss");
                 Const.END_TIME = df.format(c.getTime());
-                countDownTimer.cancel();
-                finshTest();
+                customCountDownTimer.cancel();
+
+                if (attemptedOfflineQuestions.size() > 0) {
+                    mOfflineAttemptsDialogue.show();
+                    Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                    submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                    attemptedOfflineQuestions.remove(attempt);
+                } else {
+                    mOfflineAttemptsDialogue = null;
+                    btnSubmitAll.setVisibility(View.GONE);
+                    callFinishTestAPI();
+                }
 
             }
         });
@@ -789,12 +853,13 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         });
         builder.show();
     }
+
     @Override
     public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(drawerView)){
+        if (drawerLayout.isDrawerOpen(drawerView)) {
             drawerLayout.closeDrawer(drawerView);
 
-        }else {
+        } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Exit alert");
             builder.setMessage("Are you sure to quit the test ?");
@@ -808,8 +873,17 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                     c = Calendar.getInstance();
                     df = new SimpleDateFormat("HH:mm:ss");
                     Const.END_TIME = df.format(c.getTime());
-                    countDownTimer.cancel();
-                    finshTest();
+                    customCountDownTimer.cancel();
+                    customCountDownTimer = null;
+
+                    if (!attemptedOfflineQuestions.isEmpty()) {
+                        mOfflineAttemptsDialogue.show();
+                        Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                        submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                        attemptedOfflineQuestions.remove(attempt);
+                    } else {
+                        callFinishTestAPI();
+                    }
 
                 }
             });
@@ -823,7 +897,9 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         }
 
     }
-    private void finshTest() {
+
+    //Renamed
+    private void callFinishTestAPI() {
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading....");
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -837,9 +913,9 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status_code");
                             String message = object.getString("message");
-                            Log.d("MarkSection", "onResponse: "+status);
+                            Log.d("MarkSection", "onResponse: " + status);
 
-                            if (status.equalsIgnoreCase("203")){
+                            if (status.equalsIgnoreCase("203")) {
                                 startActivity(new Intent(context, ResultPannelActivity.class));
                                 Const.answerStoreHash.clear();
                                 Const.answerQuestionStoreHash.clear();
@@ -861,13 +937,13 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
 
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
                 params.put("test_id", Const.TEST_ID);
                 params.put("student_id", "6");
-                Log.d("FinishTest", "getParams: "+params);
+                Log.d("FinishTest", "getParams: " + params);
                 return params;
             }
         };
@@ -875,6 +951,106 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         AppWebService.getInstance(context).addToRequestQueue(request);
+    }
+
+
+    //Added Later
+    public void submitOfflineAnswers(String testId, String questId, String ansId) {
+        SyncApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new SyncApiCallManager.ApiResponseListener() {
+            @Override
+            public void onSuccess(String response) {
+                if (attemptedOfflineQuestions.size() > 0) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                            submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                            attemptedOfflineQuestions.remove(attempt);
+                        }
+                    }, 500);
+                } else {
+                    mOfflineAttemptsDialogue.dismiss();
+                    btnSubmitAll.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onError(VolleyError error) {
+                answerLoad.setVisibility(View.GONE);
+                Log.e(TAG, error.getLocalizedMessage());
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (attemptedOfflineQuestions.size() > 0) {
+                            Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                            submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                            attemptedOfflineQuestions.remove(attempt);
+                        }
+                    }
+                }, 500);
+            }
+        });
+    }
+
+    public void submitOfflineAnswersAndFinish(String testId, String questId, String ansId) {
+        SyncApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new SyncApiCallManager.ApiResponseListener() {
+            @Override
+            public void onSuccess(String response) {
+                if (attemptedOfflineQuestions.size() > 0) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                            submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                            attemptedOfflineQuestions.remove(attempt);
+                        }
+                    }, 500);
+                } else {
+                    mOfflineAttemptsDialogue.dismiss();
+                    btnSubmitAll.setVisibility(View.GONE);
+                    callFinishTestAPI();
+                }
+            }
+
+            @Override
+            public void onError(VolleyError error) {
+                answerLoad.setVisibility(View.GONE);
+                Log.e(TAG, error.getLocalizedMessage());
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (attemptedOfflineQuestions.size() > 0) {
+                            Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                            submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                            attemptedOfflineQuestions.remove(attempt);
+                        }
+                    }
+                }, 500);
+            }
+        });
+    }
+
+    private void nextQuestion() {
+       /* if (submitButton.getText().toString().equalsIgnoreCase("Save")) {
+            submitButton.setVisibility(View.GONE);
+
+        }
+        if (submitButton.getText().toString().equalsIgnoreCase("Save & Next")) {
+            viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+        }
+*/
+        if (submitButton.getText().toString().equalsIgnoreCase("Save")) {
+            submitButton.setVisibility(View.GONE);
+            if (spinner_topic.getSelectedItemPosition() == Const.QUIZ_LENGTH - 1) {
+
+            } else {
+                submitButton.setText("Save & Next");
+                spinner_topic.setSelection(spinner_topic.getSelectedItemPosition() + 1);
+            }
+        }
+        if (submitButton.getText().toString().equalsIgnoreCase("Save & Next")) {
+            viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+        }
     }
 
 }

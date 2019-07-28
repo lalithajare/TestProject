@@ -2,9 +2,12 @@ package com.example.testproject.database.models;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
 
 @Entity(tableName = "quiz")
 public class Quiz {
@@ -63,6 +66,11 @@ public class Quiz {
     @ColumnInfo(name = "student_buy_plan_status")
     @SerializedName("student_buy_plan_status")
     private int studentBuyPlanStatus;
+
+    @Ignore
+    @SerializedName("Sectional Pattern")
+    private ArrayList<SectionPattern> sectionPatterns;
+
 
     public String getQuizId() {
         return quizId;
@@ -174,5 +182,13 @@ public class Quiz {
 
     public void setLocalQuizId(int localQuizId) {
         this.localQuizId = localQuizId;
+    }
+
+    public ArrayList<SectionPattern> getSectionPatterns() {
+        return sectionPatterns;
+    }
+
+    public void setSectionPatterns(ArrayList<SectionPattern> sectionPatterns) {
+        this.sectionPatterns = sectionPatterns;
     }
 }

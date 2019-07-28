@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "category")
 public class Category {
 
-    @OnConflictStrategy()
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "local_category_id")
     private int localCategoryId;

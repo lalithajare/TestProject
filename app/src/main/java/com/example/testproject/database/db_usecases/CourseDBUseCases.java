@@ -69,9 +69,9 @@ public class CourseDBUseCases {
             @Override
             public <T> void onItemListSearched(List<T> list) {
                 super.onItemListSearched(list);
-                if (list.size() == 0) {
+//                if (list.size() == 0) {
                     mOperator.addAllCourses(courseListToAdd);
-                }
+//                }
             }
 
             @Override

@@ -19,15 +19,17 @@ public interface SectionPatternDAO {
     public List<SectionPattern> getSectionPatternList();
 
     @Query("SELECT * FROM section_pattern WHERE quiz_id =:quizId")
-    public SectionPattern getSectionPatternById(String quizId);
+    public List<SectionPattern> getSectionPatternByQuizId(String quizId);
 
+    @Query("SELECT * FROM section_pattern WHERE local_section_pattern_id =:localId")
+    public SectionPattern getSectionPatternByLocalId(String localId);
 
     @Insert
     public Long insertSectionPattern(SectionPattern sectionPattern);
 
 
     @Insert
-    public void insertSectionPatternList(List<SectionPattern> sectionPattern);
+    public Long[] insertSectionPatternList(List<SectionPattern> sectionPattern);
 
     @Update
     public int updateSectionPattern(SectionPattern sectionPattern);
