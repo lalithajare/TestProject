@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.android.volley.VolleyError;
 import com.example.testproject.R;
+import com.example.testproject.common.ApiCallManager;
 import com.example.testproject.database.db_usecases.CategoryDBUseCases;
 import com.example.testproject.database.db_usecases.CourseDBUseCases;
 import com.example.testproject.database.db_usecases.QuizUseCases;
@@ -106,7 +107,7 @@ public class DatabaseInitizationService extends Service {
     private void callCoursesAPI() {
 
         // *********** API CALL TO COURSES
-        SyncApiCallManager.getInstance(mContext).callCourseAPI(new SyncApiCallManager.ApiResponseListener() {
+        ApiCallManager.getInstance(mContext).callCourseAPI(new ApiCallManager.ApiResponseListener() {
             @Override
             public void onSuccess(String response) {
                 saveCoursesLocally(response);
@@ -143,7 +144,7 @@ public class DatabaseInitizationService extends Service {
     }
 
     private void callCategoryListAPI(final Course course) {
-        SyncApiCallManager.getInstance(mContext).callCategoryListAPI(course.getCourseId(), new SyncApiCallManager.ApiResponseListener() {
+        ApiCallManager.getInstance(mContext).callCategoryListAPI(course.getCourseId(), new ApiCallManager.ApiResponseListener() {
             @Override
             public void onSuccess(String response) {
                 saveCategoriesLocally(response, course);
@@ -180,7 +181,7 @@ public class DatabaseInitizationService extends Service {
     }
 
     private void callQuizAPI(final Category category) {
-        SyncApiCallManager.getInstance(mContext).callQuizAPI(category, new SyncApiCallManager.ApiResponseListener() {
+        ApiCallManager.getInstance(mContext).callQuizAPI(category, new ApiCallManager.ApiResponseListener() {
             @Override
             public void onSuccess(String response) {
                 if (response != null && !response.isEmpty()) {

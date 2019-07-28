@@ -61,7 +61,7 @@ import com.example.testproject.Utils.Const;
 
 import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.InternetCheck;
-import com.example.testproject.database.SyncApiCallManager;
+import com.example.testproject.common.ApiCallManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -103,7 +103,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
     BigGridReviewAdapter gridReviewAdapter;
     BigRecycleReviewAdapter listReviewAdapter;
     GridView question_gridView;
-    ImageButton iv_play;
+//    ImageButton iv_play;
     public DrawerLayout drawerLayout;
     public View drawerView;
     RecyclerView question_listView;
@@ -122,7 +122,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
 
     //Added Later
     AlertDialog mOfflineAttemptsDialogue;
-    Button btnPause;
+    RelativeLayout rl_timer;
     Button btnSubmitAll;
     CustomCountDownTimer customCountDownTimer;
     ArrayList<Hashtable<String, String>> attemptedOfflineQuestions = new ArrayList<>();
@@ -134,19 +134,14 @@ public class FullTestQuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_test_quiz);
 
-        if (getIntent().getBooleanExtra("is_from_home", false)) {
-            resumeWithSavedTest();
-            resumeWithOfflineValues();
-            resumeTimerValue();
-        } else {
-            initData();
-        }
+
+        initData();
 
 
         context = FullTestQuizActivity.this;
 
         //Added Later
-        btnPause = findViewById(R.id.btnPause);
+        rl_timer = findViewById(R.id.rl_timer);
         btnSubmitAll = findViewById(R.id.btnSubmitAll);
 
         answerLoad = findViewById(R.id.ans_load);
@@ -163,7 +158,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
         markButton.setVisibility(View.GONE);
         // clearButton.setVisibility(View.GONE);
         submitButton.setVisibility(View.GONE);
-        iv_play = findViewById(R.id.iv_play);
+//        iv_play = findViewById(R.id.iv_play);
         question_gridView = findViewById(R.id.question_gridView);
         drawerLayout = findViewById(R.id.drawer_layout);
         drawerView = findViewById(R.id.drawer);
@@ -353,7 +348,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if (TextUtils.equals(btnPause.getText(), "Pause")) {
+                if (customCountDownTimer.isRunning()) {
                     if (markButton.getText().toString().equalsIgnoreCase("Mark for\n Review")
                             && Const.answerCheckHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
                         Const.hashMapSelectMarkReview.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
@@ -415,18 +410,12 @@ public class FullTestQuizActivity extends AppCompatActivity {
         mOfflineAttemptsDialogue = builder.create();
         mOfflineAttemptsDialogue.setCancelable(false);
 
-        btnPause.setOnClickListener(new View.OnClickListener() {
+        rl_timer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TextUtils.equals(btnPause.getText().toString(), "Pause")) {
-//                    saveTimerValue();
-//                    saveOfflineValues();
-                    btnPause.setText("Resume");
+                if (customCountDownTimer.isRunning()) {
                     customCountDownTimer.pause();
                 } else {
-                    btnPause.setText("Pause");
-//                    resumeTimerValue();
-//                    resumeWithOfflineValues();
                     customCountDownTimer.resume();
                 }
             }
@@ -435,7 +424,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
         btnSubmitAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TextUtils.equals(btnPause.getText(), "Pause")) {
+                if (customCountDownTimer.isRunning()) {
                     if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
                         Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
                         mOfflineAttemptsDialogue.show();
@@ -455,7 +444,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
 
     //Added Later
     public void submitOfflineAnswers(String testId, String questId, String ansId) {
-        SyncApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new SyncApiCallManager.ApiResponseListener() {
+        ApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new ApiCallManager.ApiResponseListener() {
             @Override
             public void onSuccess(String response) {
                 if (attemptedOfflineQuestions.size() > 0) {
@@ -493,7 +482,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
     }
 
     public void submitOfflineAnswersAndFinish(String testId, String questId, String ansId) {
-        SyncApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new SyncApiCallManager.ApiResponseListener() {
+        ApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new ApiCallManager.ApiResponseListener() {
             @Override
             public void onSuccess(String response) {
                 if (attemptedOfflineQuestions.size() > 0) {
@@ -550,43 +539,6 @@ public class FullTestQuizActivity extends AppCompatActivity {
         totalTime = getIntent().getStringExtra("time");
     }
 
-    private void saveOfflineValues() {
-        Bundle bundle = new Bundle();
-        bundle.putString("quiz_id", quiz_id);
-        bundle.putString("time", tv_total_time.getText().toString());
-        bundle.putSerializable("testType", FullTestQuizActivity.class.getSimpleName());
-
-        bundle.putSerializable("answerStoreHash", Const.answerStoreHash);
-        bundle.putSerializable("answerQuestionStoreHash", Const.answerQuestionStoreHash);
-        bundle.putSerializable("questionAnswerStoreHash", Const.questionAnswerStoreHash);
-        bundle.putSerializable("hashMapSelected", Const.hashMapSelected);
-        bundle.putSerializable("hashMapMarkSelected", Const.hashMapMarkSelected);
-        bundle.putSerializable("hashMapSelectMarkReview", Const.hashMapSelectMarkReview);
-        bundle.putSerializable("answerCheckHash", Const.answerCheckHash);
-        bundle.putInt("current_viewpager_index", viewPager.getCurrentItem());
-        bundle.putSerializable("attemptedOflineQuestions", attemptedOfflineQuestions);
-
-        AppPreferenceManager.saveOfflineValues(bundle);
-    }
-
-    private void resumeWithOfflineValues() {
-        Bundle bundle = AppPreferenceManager.getOfflineValues();
-        Const.answerStoreHash = (HashMap<String, String>) bundle.getSerializable("answerStoreHash");
-        Const.answerQuestionStoreHash = (HashMap<String, String>) bundle.getSerializable("answerQuestionStoreHash");
-        Const.questionAnswerStoreHash = (HashMap<String, List<FreeTestAnswer>>) bundle.getSerializable("questionAnswerStoreHash");
-        Const.hashMapSelected = (HashMap<String, Boolean>) bundle.getSerializable("hashMapSelected");
-        Const.hashMapMarkSelected = (HashMap<String, Boolean>) bundle.getSerializable("hashMapMarkSelected");
-        Const.hashMapSelectMarkReview = (HashMap<String, Boolean>) bundle.getSerializable("hashMapSelectMarkReview");
-        Const.answerCheckHash = (HashMap<String, String>) bundle.getSerializable("answerCheckHash");
-
-        attemptedOfflineQuestions = (ArrayList<Hashtable<String, String>>) bundle.getSerializable("attemptedOflineQuestions");
-        viewPagerIndexOfflineSaved = bundle.getInt("current_viewpager_index");
-        quiz_id = bundle.getString("quiz_id");
-        totalTime = bundle.getString("time");
-
-    }
-
-
     private void callTopicsAPI() {
         StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ_TOPIC, new Response.Listener<String>() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -594,7 +546,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
             public void onResponse(String response) {
                 try {
                     JSONObject topicJSON = new JSONObject(response);
-                    AppPreferenceManager.saveExamTopic(topicJSON);
+//                    AppPreferenceManager.saveExamTopic(topicJSON);
                     parseExamTopicResponse(topicJSON);
                     setTopicUI();
                     startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
@@ -711,10 +663,9 @@ public class FullTestQuizActivity extends AppCompatActivity {
                     markButton.setText("Mark for Review");
                     //clearButton.setText("Clear Selection");
                     JSONObject examJSON = new JSONObject(response);
-                    AppPreferenceManager.saveExam(examJSON);
+//                    AppPreferenceManager.saveExam(examJSON);
                     parseExamResponse(examJSON);
                     dialog.dismiss();
-                    btnPause.setVisibility(View.VISIBLE);
                 } catch (JSONException e) {
                     noDataImage.setVisibility(View.VISIBLE);
                     tryAgainText.setVisibility(View.VISIBLE);
@@ -1173,8 +1124,11 @@ public class FullTestQuizActivity extends AppCompatActivity {
                     c = Calendar.getInstance();
                     df = new SimpleDateFormat("HH:mm:ss");
                     Const.END_TIME = df.format(c.getTime());
-                    customCountDownTimer.cancel();
-                    customCountDownTimer = null;
+
+                    if (customCountDownTimer != null) {
+                        customCountDownTimer.cancel();
+                        customCountDownTimer = null;
+                    }
 
                     if (!attemptedOfflineQuestions.isEmpty()) {
                         mOfflineAttemptsDialogue.show();

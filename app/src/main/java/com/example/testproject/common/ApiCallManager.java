@@ -1,59 +1,44 @@
-package com.example.testproject.database;
+package com.example.testproject.common;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.example.testproject.Adapter.FullTestQuizAdapter;
-import com.example.testproject.Adapter.FullTestTopicAdapter;
-import com.example.testproject.Model.QuizTopic;
-import com.example.testproject.Model.TestPattern;
-import com.example.testproject.Model.TestQuizSetGet;
 import com.example.testproject.URLs.UrlsAvision;
 import com.example.testproject.Utils.AppWebService;
-import com.example.testproject.Utils.Const;
-import com.example.testproject.common.MyApplication;
-import com.example.testproject.database.db_usecases.CourseDBUseCases;
 import com.example.testproject.database.models.Category;
-import com.example.testproject.database.operators.DBOperationsHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 
-import static com.example.testproject.Utils.Const.patternArrayList;
-
-public class SyncApiCallManager {
+public class ApiCallManager {
 
     private Context mContext;
-    private static SyncApiCallManager mSyncApiCallManager;
+    private static ApiCallManager mApiCallManager;
 
-    private SyncApiCallManager(Context context) {
+    private ApiCallManager(Context context) {
         mContext = context;
     }
 
-    public static SyncApiCallManager getInstance(Context context) {
+    public static ApiCallManager getInstance(Context context) {
 
-        if (mSyncApiCallManager == null) {
-            mSyncApiCallManager = new SyncApiCallManager(context);
+        if (mApiCallManager == null) {
+            mApiCallManager = new ApiCallManager(context);
         }
 
-        synchronized (mSyncApiCallManager) {
-            return mSyncApiCallManager;
+        synchronized (mApiCallManager) {
+            return mApiCallManager;
         }
     }
 

@@ -9,26 +9,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -37,7 +30,6 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -64,7 +56,7 @@ import com.example.testproject.Utils.Const;
 
 import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.InternetCheck;
-import com.example.testproject.database.SyncApiCallManager;
+import com.example.testproject.common.ApiCallManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -100,7 +92,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
     BigGridReviewAdapter gridReviewAdapter;
     BigRecycleReviewAdapter listReviewAdapter;
     GridView question_gridView;
-    ImageButton iv_play;
+//    ImageButton iv_play;
     public DrawerLayout drawerLayout;
     public View drawerView;
     RecyclerView question_listView;
@@ -119,7 +111,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
 
     //Added Later
     AlertDialog mOfflineAttemptsDialogue;
-    Button btnPause;
+    RelativeLayout rl_timer;
     Button btnSubmitAll;
     CustomCountDownTimer customCountDownTimer;
     ArrayList<Hashtable<String, String>> attemptedOfflineQuestions = new ArrayList<>();
@@ -134,7 +126,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         context = FullNotChangeTestQuizActivity.this;
 
         //Added Later
-        btnPause = findViewById(R.id.btnPause);
+        rl_timer = findViewById(R.id.rl_timer);
         btnSubmitAll = findViewById(R.id.btnSubmitAll);
 
         answerLoad = findViewById(R.id.ans_load);
@@ -151,7 +143,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         markButton.setVisibility(View.GONE);
         submitButton.setVisibility(View.GONE);
         //clearButton.setVisibility(View.GONE);
-        iv_play = findViewById(R.id.iv_play);
+//        iv_play = findViewById(R.id.iv_play);
         question_gridView = findViewById(R.id.question_gridView);
         drawerLayout = findViewById(R.id.drawer_layout);
         drawerView = findViewById(R.id.drawer);
@@ -312,7 +304,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TextUtils.equals(btnPause.getText(), "Pause")) {
+                if (customCountDownTimer.isRunning()) {
                     if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
                         if (markButton.getText().toString().equalsIgnoreCase("Mark for\n Review")
                                 && Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
@@ -362,18 +354,12 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         mOfflineAttemptsDialogue = builder.create();
         mOfflineAttemptsDialogue.setCancelable(false);
 
-        btnPause.setOnClickListener(new View.OnClickListener() {
+        rl_timer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TextUtils.equals(btnPause.getText().toString(), "Pause")) {
-//                    saveTimerValue();
-//                    saveOfflineValues();
-                    btnPause.setText("Resume");
+                if (customCountDownTimer.isRunning()) {
                     customCountDownTimer.pause();
                 } else {
-                    btnPause.setText("Pause");
-//                    resumeTimerValue();
-//                    resumeWithOfflineValues();
                     customCountDownTimer.resume();
                 }
             }
@@ -382,7 +368,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         btnSubmitAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TextUtils.equals(btnPause.getText(), "Pause")) {
+                if (customCountDownTimer.isRunning()) {
                     if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
                         Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
                         mOfflineAttemptsDialogue.show();
@@ -691,8 +677,6 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
                     }
                     dialog.dismiss();
-                    btnPause.setVisibility(View.VISIBLE);
-
                 } catch (JSONException e) {
                     noDataImage.setVisibility(View.VISIBLE);
                     tryAgainText.setVisibility(View.VISIBLE);
@@ -802,7 +786,10 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                     }
 
                     if (attemptedOfflineQuestions.isEmpty()) {
-                        customCountDownTimer.cancel();
+                        if (customCountDownTimer != null) {
+                            customCountDownTimer.cancel();
+                            customCountDownTimer = null;
+                        }
                         callFinishTestAPI();
                     } else {
                         Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
@@ -830,7 +817,11 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                 c = Calendar.getInstance();
                 df = new SimpleDateFormat("HH:mm:ss");
                 Const.END_TIME = df.format(c.getTime());
-                customCountDownTimer.cancel();
+
+                if (customCountDownTimer != null) {
+                    customCountDownTimer.cancel();
+                    customCountDownTimer = null;
+                }
 
                 if (attemptedOfflineQuestions.size() > 0) {
                     mOfflineAttemptsDialogue.show();
@@ -873,8 +864,11 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                     c = Calendar.getInstance();
                     df = new SimpleDateFormat("HH:mm:ss");
                     Const.END_TIME = df.format(c.getTime());
-                    customCountDownTimer.cancel();
-                    customCountDownTimer = null;
+
+                    if (customCountDownTimer != null) {
+                        customCountDownTimer.cancel();
+                        customCountDownTimer = null;
+                    }
 
                     if (!attemptedOfflineQuestions.isEmpty()) {
                         mOfflineAttemptsDialogue.show();
@@ -956,7 +950,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
 
     //Added Later
     public void submitOfflineAnswers(String testId, String questId, String ansId) {
-        SyncApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new SyncApiCallManager.ApiResponseListener() {
+        ApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new ApiCallManager.ApiResponseListener() {
             @Override
             public void onSuccess(String response) {
                 if (attemptedOfflineQuestions.size() > 0) {
@@ -993,7 +987,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
     }
 
     public void submitOfflineAnswersAndFinish(String testId, String questId, String ansId) {
-        SyncApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new SyncApiCallManager.ApiResponseListener() {
+        ApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new ApiCallManager.ApiResponseListener() {
             @Override
             public void onSuccess(String response) {
                 if (attemptedOfflineQuestions.size() > 0) {
