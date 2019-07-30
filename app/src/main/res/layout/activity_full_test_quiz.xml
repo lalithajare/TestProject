@@ -342,8 +342,6 @@
                     android:layout_gravity="end"
                     android:layout_marginStart="2dp"
                     android:layout_marginLeft="2dp"
-                    android:layout_toEndOf="@+id/btnPause"
-                    android:layout_toRightOf="@+id/btnPause"
                     android:layout_weight="1"
                     android:background="@drawable/back_gradient"
                     android:backgroundTint="@color/colorAccent"

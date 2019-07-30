@@ -1,7 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
+
     compileSdkVersion 28
+
+    lintOptions {
+        checkReleaseBuilds false
+    }
+
     defaultConfig {
         applicationId "com.example.testproject"
         minSdkVersion 16
@@ -16,10 +22,21 @@ android {
             }
         }
     }
+
+    signingConfigs {
+        release {
+            storeFile file("testproject-release.jks")
+            storePassword 'testproject'
+            keyAlias 'testproject'
+            keyPassword 'testproject'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

@@ -664,7 +664,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
                     //clearButton.setText("Clear Selection");
                     JSONObject examJSON = new JSONObject(response);
 //                    AppPreferenceManager.saveExam(examJSON);
-                    parseExamResponse(examJSON);
+                     parseExamResponse(examJSON);
                     dialog.dismiss();
                 } catch (JSONException e) {
                     noDataImage.setVisibility(View.VISIBLE);
