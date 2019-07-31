@@ -49,12 +49,12 @@
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
                         android:layout_centerVertical="true"
-                        android:paddingTop="@dimen/spacing_5dp"
-                        android:paddingBottom="@dimen/spacing_5dp"
                         android:paddingStart="@dimen/spacing_20dp"
                         android:paddingLeft="@dimen/spacing_20dp"
+                        android:paddingTop="@dimen/spacing_5dp"
                         android:paddingEnd="@dimen/spacing_20dp"
-                        android:paddingRight="@dimen/spacing_20dp">
+                        android:paddingRight="@dimen/spacing_20dp"
+                        android:paddingBottom="@dimen/spacing_5dp">
 
                         <ImageView
                             android:id="@+id/iv_play"
@@ -88,7 +88,6 @@
                         android:backgroundTint="@color/white"
                         android:clickable="true"
                         android:focusable="true"
-                        android:onClick="showFinishTestDialogue"
                         android:text="Finish"
                         android:textAllCaps="false"
                         android:textColor="@color/colorPrimary"

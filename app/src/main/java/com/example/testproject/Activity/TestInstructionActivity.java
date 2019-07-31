@@ -228,7 +228,7 @@ public class TestInstructionActivity extends AppCompatActivity {
                                 // tv_mode_msg.setText(getResources().getString(R.string.modeAMsg));
                                 break;
                             case R.id.rb_mode_b:
-                                //Toast.makeText(context, "ModeB", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(mContext, "ModeB", Toast.LENGTH_SHORT).show();
                                 //tv_mode_msg.setText(getResources().getString(R.string.modeBMsg));
 
                                 break;

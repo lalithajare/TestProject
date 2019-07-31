@@ -64,7 +64,7 @@ public class TopRankerActivity extends AppCompatActivity {
         cardView_top4=findViewById(R.id.cardView_top4);
 
         rv_top_rankers.setHasFixedSize(true);
-        //topRankerAdapter = new TopRankerAdapter(context, topRankerList);
+        //topRankerAdapter = new TopRankerAdapter(mContext, topRankerList);
         layoutManager_ranker = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         rv_top_rankers.setLayoutManager(layoutManager_ranker);
         populateTopRankerList();
