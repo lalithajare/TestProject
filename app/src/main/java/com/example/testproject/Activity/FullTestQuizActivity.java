@@ -3,6 +3,7 @@ package com.example.testproject.Activity;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -20,6 +21,8 @@ import com.example.testproject.R;
 import com.example.testproject.Utils.Const;
 import com.example.testproject.Utils.InternetCheck;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -259,5 +262,45 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(drawerView)) {
+            drawerLayout.closeDrawer(drawerView);
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Exit alert");
+            builder.setMessage("Are you sure to quit? The test will be paused.");
+            builder.setIcon(R.drawable.ic_info);
+            builder.setCancelable(false);
+            builder.setPositiveButton("Quit", new DialogInterface.OnClickListener() {
+                @SuppressLint("SimpleDateFormat")
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    dialog.dismiss();
+
+                    c = Calendar.getInstance();
+                    df = new SimpleDateFormat("HH:mm:ss");
+                    Const.END_TIME = df.format(c.getTime());
+
+                    if (customCountDownTimer != null) {
+                        customCountDownTimer.cancel();
+                        customCountDownTimer = null;
+                    }
+
+                    saveTestState();
+                    finish();
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+        }
     }
 }

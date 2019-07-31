@@ -259,7 +259,8 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                Log.e(TAG, "Not able to fetch topics");
+                setTopicUI();
             }
         }) {
             @Override
@@ -701,7 +702,10 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                     }
 
                     if (attemptedOfflineQuestions.isEmpty()) {
-                        customCountDownTimer.cancel();
+                        if (customCountDownTimer != null) {
+                            customCountDownTimer.cancel();
+                            customCountDownTimer = null;
+                        }
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -819,49 +823,6 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         AppWebService.getInstance(mContext).addToRequestQueue(request);
-    }
-
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-
-        if (drawerLayout.isDrawerOpen(drawerView)) {
-            drawerLayout.closeDrawer(drawerView);
-        } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Exit alert");
-            builder.setMessage("Are you sure to quit? The test will be paused.");
-            builder.setIcon(R.drawable.ic_info);
-            builder.setCancelable(false);
-            builder.setPositiveButton("Quit", new DialogInterface.OnClickListener() {
-                @SuppressLint("SimpleDateFormat")
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-
-                    dialog.dismiss();
-
-                    c = Calendar.getInstance();
-                    df = new SimpleDateFormat("HH:mm:ss");
-                    Const.END_TIME = df.format(c.getTime());
-
-                    if (customCountDownTimer != null) {
-                        customCountDownTimer.cancel();
-                        customCountDownTimer = null;
-                    }
-
-                    saveTestState();
-                    finish();
-                }
-            });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            builder.show();
-        }
     }
 
     protected void saveTestState() {
