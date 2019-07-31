@@ -17,7 +17,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
 
@@ -50,7 +49,6 @@ import com.example.testproject.Adapter.BigGridReviewAdapter;
 import com.example.testproject.Adapter.BigRecycleReviewAdapter;
 import com.example.testproject.Adapter.FullQuizTestPageAdapter;
 import com.example.testproject.Model.AnswerSetGet;
-import com.example.testproject.Model.FreeTestAnswer;
 import com.example.testproject.Model.FullQuestionSetGet;
 import com.example.testproject.Model.FullTopicTest;
 import com.example.testproject.R;
@@ -60,7 +58,9 @@ import com.example.testproject.Utils.AppWebService;
 import com.example.testproject.Utils.Const;
 
 import com.example.testproject.Utils.CustomCountDownTimer;
+import com.example.testproject.Utils.CustomViewPager;
 import com.example.testproject.Utils.InternetCheck;
+import com.example.testproject.Utils.UtilFunctions;
 import com.example.testproject.common.ApiCallManager;
 
 import org.json.JSONArray;
@@ -72,19 +72,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 
-public class FullTestQuizActivity extends AppCompatActivity {
+public class FullTestQuizActivity extends ParentQuizActivity {
     private static final String TAG = FullTestQuizActivity.class.getSimpleName();
-    String quiz_id;
-    String totalTime;
 
-
-    int viewPagerIndexOfflineSaved = 0;
-    ViewPager viewPager;
     private ImageView noDataImage;
     private TextView tryAgainText;
     Button finishButton, submitButton, markButton;
@@ -103,7 +97,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
     BigGridReviewAdapter gridReviewAdapter;
     BigRecycleReviewAdapter listReviewAdapter;
     GridView question_gridView;
-//    ImageButton iv_play;
+    //    ImageButton iv_play;
     public DrawerLayout drawerLayout;
     public View drawerView;
     RecyclerView question_listView;
@@ -121,9 +115,13 @@ public class FullTestQuizActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
 
     //Added Later
+    String quiz_id;
+    String totalTime;
+    Boolean wasPaused;
+    CustomViewPager viewPager;
     AlertDialog mOfflineAttemptsDialogue;
     RelativeLayout rl_timer;
-    Button btnSubmitAll;
+    ImageView iv_play;
     CustomCountDownTimer customCountDownTimer;
     ArrayList<Hashtable<String, String>> attemptedOfflineQuestions = new ArrayList<>();
 
@@ -142,7 +140,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
 
         //Added Later
         rl_timer = findViewById(R.id.rl_timer);
-        btnSubmitAll = findViewById(R.id.btnSubmitAll);
+        iv_play = findViewById(R.id.iv_play);
 
         answerLoad = findViewById(R.id.ans_load);
         tv_total_time = findViewById(R.id.tv_total_time);
@@ -370,7 +368,6 @@ public class FullTestQuizActivity extends AppCompatActivity {
                         params.put("answers_id", Const.ANSWER_ID);
                         params.put("question_status", "1");
                         attemptedOfflineQuestions.add(params);
-                        btnSubmitAll.setVisibility(View.VISIBLE);
                         nextQuestion();
                     }
                     for (Map.Entry<String, Boolean> entry : Const.hashMapSelected.entrySet()) {
@@ -415,68 +412,13 @@ public class FullTestQuizActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (customCountDownTimer.isRunning()) {
                     customCountDownTimer.pause();
+                    viewPager.setPagingEnabled(false);
+                    iv_play.setImageResource(R.drawable.ic_timer_pause);
                 } else {
                     customCountDownTimer.resume();
+                    viewPager.setPagingEnabled(true);
+                    iv_play.setImageResource(R.drawable.ic_timer_play);
                 }
-            }
-        });
-
-        btnSubmitAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (customCountDownTimer.isRunning()) {
-                    if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
-                        Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
-                        mOfflineAttemptsDialogue.show();
-                        submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
-                        attemptedOfflineQuestions.remove(attemptedOfflineQuestions.size() - 1);
-                    } else {
-                        Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(getApplicationContext(), "The Test is Paused, please resume it.", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-
-
-    }
-
-    //Added Later
-    public void submitOfflineAnswers(String testId, String questId, String ansId) {
-        ApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new ApiCallManager.ApiResponseListener() {
-            @Override
-            public void onSuccess(String response) {
-                if (attemptedOfflineQuestions.size() > 0) {
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            answerLoad.setVisibility(View.GONE);
-                            Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
-                            submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
-                            attemptedOfflineQuestions.remove(attempt);
-                        }
-                    }, 500);
-                } else {
-                    mOfflineAttemptsDialogue.dismiss();
-                    btnSubmitAll.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onError(VolleyError error) {
-                answerLoad.setVisibility(View.GONE);
-                Log.e(TAG, error.getLocalizedMessage());
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (attemptedOfflineQuestions.size() > 0) {
-                            Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
-                            submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
-                            attemptedOfflineQuestions.remove(attempt);
-                        }
-                    }
-                }, 500);
             }
         });
     }
@@ -496,7 +438,6 @@ public class FullTestQuizActivity extends AppCompatActivity {
                     }, 500);
                 } else {
                     mOfflineAttemptsDialogue.dismiss();
-                    btnSubmitAll.setVisibility(View.GONE);
                     callFinishTestAPI();
                 }
             }
@@ -510,7 +451,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
                     public void run() {
                         if (attemptedOfflineQuestions.size() > 0) {
                             Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
-                            submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                            submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
                             attemptedOfflineQuestions.remove(attempt);
                         }
                     }
@@ -537,6 +478,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
     private void initData() {
         quiz_id = getIntent().getStringExtra("quiz_id");
         totalTime = getIntent().getStringExtra("time");
+        wasPaused = getIntent().getBooleanExtra("was_paused", false);
     }
 
     private void callTopicsAPI() {
@@ -549,7 +491,11 @@ public class FullTestQuizActivity extends AppCompatActivity {
 //                    AppPreferenceManager.saveExamTopic(topicJSON);
                     parseExamTopicResponse(topicJSON);
                     setTopicUI();
-                    startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
+                    if (wasPaused) {
+                        resumeWithSavedTestState();
+                    } else {
+                        startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
 
@@ -664,7 +610,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
                     //clearButton.setText("Clear Selection");
                     JSONObject examJSON = new JSONObject(response);
 //                    AppPreferenceManager.saveExam(examJSON);
-                     parseExamResponse(examJSON);
+                    parseExamResponse(examJSON);
                     dialog.dismiss();
                 } catch (JSONException e) {
                     noDataImage.setVisibility(View.VISIBLE);
@@ -882,9 +828,11 @@ public class FullTestQuizActivity extends AppCompatActivity {
             }
         });
 
-        if (viewPagerIndexOfflineSaved != 0) {
-            viewPager.setCurrentItem(viewPagerIndexOfflineSaved);
+        if (wasPaused) {
+            String index = AppPreferenceManager.getQuizPageIndex(quiz_id);
+            viewPager.setCurrentItem(Integer.parseInt(index));
         }
+
     }
 
     /*============================================Save Answer===========================================*/
@@ -927,7 +875,6 @@ public class FullTestQuizActivity extends AppCompatActivity {
                 params.put("answers_id", Const.ANSWER_ID);
                 params.put("question_status", "1");
                 attemptedOfflineQuestions.add(params);
-                btnSubmitAll.setVisibility(View.VISIBLE);
             }
         }) {
             @Override
@@ -950,34 +897,16 @@ public class FullTestQuizActivity extends AppCompatActivity {
     }
 
 
-    private void saveTimerValue() {
-        AppPreferenceManager.saveTimerValue(tv_total_time.getText().toString());
-    }
-
-    private void resumeTimerValue() {
-        String[] time = AppPreferenceManager.getTimerValue().split(":");
-        float minute = Float.parseFloat(time[1]);
-        startChangebleTimer(minute);
-    }
-
-
-    private void resumeWithSavedTest() {
-        //GET SAVED EXAM TOPICS
-        JSONObject object = AppPreferenceManager.getExamTopic();
-        try {
-            parseExamTopicResponse(object);
-            setTopicUI();
-            startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
-
-            //GET SAVED EXAM
-            JSONObject examJSON = AppPreferenceManager.getExam();
-            parseExamResponse(examJSON);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
+    private void resumeWithSavedTestState() {
+        String resumeTime = AppPreferenceManager.getQuizPauseTime(quiz_id);
+        String strHours = resumeTime.split(":")[0];
+        String strMins = resumeTime.split(":")[1];
+        String strSecs = resumeTime.split(":")[2];
+        float actualTimeLeft = Float.parseFloat(strHours) * 60f + Float.parseFloat(strMins) + Float.parseFloat(strSecs) / 60f;
+        startChangebleTimer(actualTimeLeft);
+        ArrayList<Hashtable<String, String>> offlineAttempts = AppPreferenceManager.getOfflineAttemptState(quiz_id);
+        if (offlineAttempts != null)
+            attemptedOfflineQuestions.addAll(offlineAttempts);
     }
 
     //Timer Changed
@@ -1013,7 +942,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
     }
 
 
-    public void finishTest(View view) {
+    public void showFinishTestDialogue(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Exit alert");
         builder.setMessage("Are you sure to finish the test?");
@@ -1026,8 +955,11 @@ public class FullTestQuizActivity extends AppCompatActivity {
                 c = Calendar.getInstance();
                 df = new SimpleDateFormat("HH:mm:ss");
                 Const.END_TIME = df.format(c.getTime());
-                customCountDownTimer.cancel();
-                customCountDownTimer = null;
+
+                if (customCountDownTimer != null) {
+                    customCountDownTimer.cancel();
+                    customCountDownTimer = null;
+                }
 
                 if (!attemptedOfflineQuestions.isEmpty()) {
                     mOfflineAttemptsDialogue.show();
@@ -1076,7 +1008,7 @@ public class FullTestQuizActivity extends AppCompatActivity {
                                 Const.hashMapMarkSelected.clear();
                                 Const.hashMapSelectMarkReview.clear();
                                 Const.answerCheckHash.clear();
-                                AppPreferenceManager.clearPrefs();
+                                AppPreferenceManager.deleteTestState(quiz_id);
                                 finish();
                             }
                             progressDialog.hide();
@@ -1088,7 +1020,8 @@ public class FullTestQuizActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                UtilFunctions.showToast("Test submition failed, try again");
+                progressDialog.hide();
             }
         }) {
             @Override
@@ -1108,13 +1041,13 @@ public class FullTestQuizActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
         if (drawerLayout.isDrawerOpen(drawerView)) {
             drawerLayout.closeDrawer(drawerView);
-
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Exit alert");
-            builder.setMessage("Are you sure to quit the test ?");
+            builder.setMessage("Are you sure to quit? The test will be paused.");
             builder.setIcon(R.drawable.ic_info);
             builder.setCancelable(false);
             builder.setPositiveButton("Quit", new DialogInterface.OnClickListener() {
@@ -1130,14 +1063,8 @@ public class FullTestQuizActivity extends AppCompatActivity {
                         customCountDownTimer = null;
                     }
 
-                    if (!attemptedOfflineQuestions.isEmpty()) {
-                        mOfflineAttemptsDialogue.show();
-                        Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
-                        submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
-                        attemptedOfflineQuestions.remove(attempt);
-                    } else {
-                        callFinishTestAPI();
-                    }
+                    saveTestState();
+                    finish();
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1149,6 +1076,12 @@ public class FullTestQuizActivity extends AppCompatActivity {
             builder.show();
         }
 
+    }
+
+    private void saveTestState() {
+        String timePaused = tv_total_time.getText().toString().trim();
+        AppPreferenceManager.addQuizState(quiz_id, timePaused, String.valueOf(viewPager.getCurrentItem()));
+        AppPreferenceManager.saveOfflineAttemptStates(quiz_id, attemptedOfflineQuestions);
     }
 
 }

@@ -16,7 +16,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -51,10 +50,12 @@ import com.example.testproject.Model.FullQuestionSetGet;
 import com.example.testproject.Model.FullTopicTest;
 import com.example.testproject.R;
 import com.example.testproject.URLs.UrlsAvision;
+import com.example.testproject.Utils.AppPreferenceManager;
 import com.example.testproject.Utils.AppWebService;
 import com.example.testproject.Utils.Const;
 
 import com.example.testproject.Utils.CustomCountDownTimer;
+import com.example.testproject.Utils.CustomViewPager;
 import com.example.testproject.Utils.InternetCheck;
 import com.example.testproject.common.ApiCallManager;
 
@@ -70,9 +71,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 
-public class FullNotChangeTestQuizActivity extends AppCompatActivity {
+public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
     private static final String TAG = FullNotChangeTestQuizActivity.class.getSimpleName();
-    ViewPager viewPager;
+    CustomViewPager viewPager;
     private ImageView noDataImage;
     private TextView tryAgainText;
     Button finishButton, submitButton, markButton;
@@ -92,7 +93,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
     BigGridReviewAdapter gridReviewAdapter;
     BigRecycleReviewAdapter listReviewAdapter;
     GridView question_gridView;
-//    ImageButton iv_play;
+    //    ImageButton iv_play;
     public DrawerLayout drawerLayout;
     public View drawerView;
     RecyclerView question_listView;
@@ -112,10 +113,11 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
     //Added Later
     AlertDialog mOfflineAttemptsDialogue;
     RelativeLayout rl_timer;
-    Button btnSubmitAll;
+    ImageView iv_play;
     CustomCountDownTimer customCountDownTimer;
     ArrayList<Hashtable<String, String>> attemptedOfflineQuestions = new ArrayList<>();
-
+    Boolean wasPaused;
+    String quiz_id;
 
     @SuppressLint("SimpleDateFormat")
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -125,9 +127,12 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         setContentView(R.layout.activity_full_test_quiz);
         context = FullNotChangeTestQuizActivity.this;
 
+
         //Added Later
+        quiz_id = getIntent().getStringExtra("quiz_id");
+        wasPaused = getIntent().getBooleanExtra("was_paused", false);
         rl_timer = findViewById(R.id.rl_timer);
-        btnSubmitAll = findViewById(R.id.btnSubmitAll);
+        iv_play = findViewById(R.id.iv_play);
 
         answerLoad = findViewById(R.id.ans_load);
         tv_total_time = findViewById(R.id.tv_total_time);
@@ -296,7 +301,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         });
 
         if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
-            setTopicLayout();
+            callTopicsAPI();
         } else {
             Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
         }
@@ -324,7 +329,6 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                         params.put("answers_id", Const.ANSWER_ID);
                         params.put("question_status", "1");
                         attemptedOfflineQuestions.add(params);
-                        btnSubmitAll.setVisibility(View.VISIBLE);
                         nextQuestion();
                     }
                 } else {
@@ -359,32 +363,18 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (customCountDownTimer.isRunning()) {
                     customCountDownTimer.pause();
+                    viewPager.setPagingEnabled(false);
+                    iv_play.setImageResource(R.drawable.ic_timer_pause);
                 } else {
                     customCountDownTimer.resume();
-                }
-            }
-        });
-
-        btnSubmitAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (customCountDownTimer.isRunning()) {
-                    if (InternetCheck.isInternetOn(Objects.requireNonNull(getApplicationContext()))) {
-                        Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
-                        mOfflineAttemptsDialogue.show();
-                        submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
-                        attemptedOfflineQuestions.remove(attempt);
-                    } else {
-                        Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(getApplicationContext(), "The Test is Paused, please resume it.", Toast.LENGTH_LONG).show();
+                    viewPager.setPagingEnabled(true);
+                    iv_play.setImageResource(R.drawable.ic_timer_play);
                 }
             }
         });
     }
 
-    private void setTopicLayout() {
+    private void callTopicsAPI() {
         StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ_TOPIC, new Response.Listener<String>() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
@@ -411,31 +401,14 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                             Const.QUIZ_LENGTH = jsonArray.length();
 
                         }
-                        adapter = new ArrayAdapter<String>(Objects.requireNonNull(getApplicationContext()), R.layout.free_spinner_layout, strings);
-                        spinner_topic.setAdapter(adapter);
-                        spinner_topic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                                if (spinner_topic.getSelectedItemPosition() < Const.QUIZ_LENGTH) {
-                                    if (submitButton.getVisibility() == View.VISIBLE) {
-                                        submitButton.setVisibility(View.GONE);
-                                        submitButton.setText("Save & Next");
-                                    }
-                                    Const.TOPIC_SIZE = spinner_topic.getAdapter().getCount();
 
-                                    Const.TOPIC_NAME = topicList.get(position).full_length_type_name;
-                                    Const.TEST_TIME = topicList.get(position).full_length_duration;
-                                    Const.TYPE_ID = topicList.get(position).full_length_type_id;
-                                    getFullNotChangeTestQues();
-                                    rl_ques.setVisibility(View.GONE);
-                                }
-                            }
+                        setTopicsUI();
 
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-
-                            }
-                        });
+                        if (wasPaused) {
+                            resumeWithSavedTestState();
+                        } else {
+                            startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
+                        }
 
 
                     } else {
@@ -472,6 +445,34 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         };
 
         AppWebService.getInstance(getApplicationContext()).addToRequestQueue(request);
+    }
+
+    private void setTopicsUI() {
+        adapter = new ArrayAdapter<String>(Objects.requireNonNull(getApplicationContext()), R.layout.free_spinner_layout, strings);
+        spinner_topic.setAdapter(adapter);
+        spinner_topic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                if (spinner_topic.getSelectedItemPosition() < Const.QUIZ_LENGTH) {
+                    if (submitButton.getVisibility() == View.VISIBLE) {
+                        submitButton.setVisibility(View.GONE);
+                        submitButton.setText("Save & Next");
+                    }
+                    Const.TOPIC_SIZE = spinner_topic.getAdapter().getCount();
+
+                    Const.TOPIC_NAME = topicList.get(position).full_length_type_name;
+                    Const.TEST_TIME = topicList.get(position).full_length_duration;
+                    Const.TYPE_ID = topicList.get(position).full_length_type_id;
+                    getFullNotChangeTestQues();
+                    rl_ques.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 
     private void getFullNotChangeTestQues() {
@@ -769,6 +770,50 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
 
     }
 
+    private void resumeWithSavedTestState() {
+        String resumeTime = AppPreferenceManager.getQuizPauseTime(quiz_id);
+        String strHours = resumeTime.split(":")[0];
+        String strMins = resumeTime.split(":")[1];
+        String strSecs = resumeTime.split(":")[2];
+        float actualTimeLeft = Float.parseFloat(strHours) * 60f + Float.parseFloat(strMins) + Float.parseFloat(strSecs) / 60f;
+        startChangebleTimer(actualTimeLeft);
+        ArrayList<Hashtable<String, String>> offlineAttempts = AppPreferenceManager.getOfflineAttemptState(quiz_id);
+        if (offlineAttempts != null)
+            attemptedOfflineQuestions.addAll(offlineAttempts);
+    }
+
+    //Timer Changed
+    private void startChangebleTimer(final float minute) {
+        customCountDownTimer = new CustomCountDownTimer((long) (60 * minute * 1000), 500, true) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long seconds = millisUntilFinished / 1000;
+                tv_total_time.setText(String.format("%02d", seconds / 3600) + ":" + String.format("%02d", (seconds % 3600) / 60) + ":" + String.format("%02d", seconds % 60));
+            }
+
+            @Override
+            public void onFinish() {
+                if (tv_total_time.getText().equals("00:00:00")) {
+                    if (submitButton.getVisibility() == View.VISIBLE) {
+                        submitButton.setVisibility(View.GONE);
+                        submitButton.setText("Save & Next");
+                    }
+
+                    if (attemptedOfflineQuestions.isEmpty()) {
+                        customCountDownTimer.cancel();
+                        callFinishTestAPI();
+                    } else {
+                        Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                        mOfflineAttemptsDialogue.show();
+                        submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                        attemptedOfflineQuestions.remove(attempt);
+                    }
+                }
+            }
+        };
+        customCountDownTimer.create();
+    }
+
     private void startTimer(final float minute) {
         customCountDownTimer = new CustomCountDownTimer((long) (60 * minute * 1000), 500, true) {
             @Override
@@ -804,7 +849,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
     }
 
 
-    public void finishTest(View view) {
+    public void showFinishTestDialogue(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Finish Test");
         builder.setMessage("Are you sure to finish the test?");
@@ -830,7 +875,6 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                     attemptedOfflineQuestions.remove(attempt);
                 } else {
                     mOfflineAttemptsDialogue = null;
-                    btnSubmitAll.setVisibility(View.GONE);
                     callFinishTestAPI();
                 }
 
@@ -860,25 +904,15 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                 @SuppressLint("SimpleDateFormat")
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-
                     c = Calendar.getInstance();
                     df = new SimpleDateFormat("HH:mm:ss");
                     Const.END_TIME = df.format(c.getTime());
-
                     if (customCountDownTimer != null) {
                         customCountDownTimer.cancel();
                         customCountDownTimer = null;
                     }
-
-                    if (!attemptedOfflineQuestions.isEmpty()) {
-                        mOfflineAttemptsDialogue.show();
-                        Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
-                        submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
-                        attemptedOfflineQuestions.remove(attempt);
-                    } else {
-                        callFinishTestAPI();
-                    }
-
+                    saveTestState();
+                    finish();
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -918,6 +952,7 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                                 Const.hashMapMarkSelected.clear();
                                 Const.hashMapSelectMarkReview.clear();
                                 Const.answerCheckHash.clear();
+                                AppPreferenceManager.deleteTestState(quiz_id);
                                 finish();
                             }
                             progressDialog.hide();
@@ -947,45 +982,6 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         AppWebService.getInstance(context).addToRequestQueue(request);
     }
 
-
-    //Added Later
-    public void submitOfflineAnswers(String testId, String questId, String ansId) {
-        ApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new ApiCallManager.ApiResponseListener() {
-            @Override
-            public void onSuccess(String response) {
-                if (attemptedOfflineQuestions.size() > 0) {
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
-                            submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
-                            attemptedOfflineQuestions.remove(attempt);
-                        }
-                    }, 500);
-                } else {
-                    mOfflineAttemptsDialogue.dismiss();
-                    btnSubmitAll.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onError(VolleyError error) {
-                answerLoad.setVisibility(View.GONE);
-                Log.e(TAG, error.getLocalizedMessage());
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (attemptedOfflineQuestions.size() > 0) {
-                            Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
-                            submitOfflineAnswers(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
-                            attemptedOfflineQuestions.remove(attempt);
-                        }
-                    }
-                }, 500);
-            }
-        });
-    }
-
     public void submitOfflineAnswersAndFinish(String testId, String questId, String ansId) {
         ApiCallManager.getInstance(this).callSubmitAnswerAPI(testId, questId, ansId, new ApiCallManager.ApiResponseListener() {
             @Override
@@ -1001,7 +997,6 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
                     }, 500);
                 } else {
                     mOfflineAttemptsDialogue.dismiss();
-                    btnSubmitAll.setVisibility(View.GONE);
                     callFinishTestAPI();
                 }
             }
@@ -1025,14 +1020,6 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
     }
 
     private void nextQuestion() {
-       /* if (submitButton.getText().toString().equalsIgnoreCase("Save")) {
-            submitButton.setVisibility(View.GONE);
-
-        }
-        if (submitButton.getText().toString().equalsIgnoreCase("Save & Next")) {
-            viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
-        }
-*/
         if (submitButton.getText().toString().equalsIgnoreCase("Save")) {
             submitButton.setVisibility(View.GONE);
             if (spinner_topic.getSelectedItemPosition() == Const.QUIZ_LENGTH - 1) {
@@ -1045,6 +1032,12 @@ public class FullNotChangeTestQuizActivity extends AppCompatActivity {
         if (submitButton.getText().toString().equalsIgnoreCase("Save & Next")) {
             viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
         }
+    }
+
+    private void saveTestState() {
+        String timePaused = tv_total_time.getText().toString().trim();
+        AppPreferenceManager.addQuizState(quiz_id, timePaused, String.valueOf(viewPager.getCurrentItem()));
+        AppPreferenceManager.saveOfflineAttemptStates(quiz_id, attemptedOfflineQuestions);
     }
 
 }

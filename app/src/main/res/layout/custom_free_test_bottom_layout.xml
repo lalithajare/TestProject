@@ -59,6 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <Button
                 android:id="@+id/btn_start_quiz"
                 android:layout_gravity="center"
@@ -72,6 +73,20 @@
                 android:visibility="visible"
                 android:textColor="@color/white"
                 android:background="@color/colorAccent"/>
+
+            <Button
+                android:id="@+id/btn_resume_quiz"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:padding="@dimen/margin_10"
+                android:layout_height="@dimen/spacing_40dp"
+                android:text="Resume Test"
+                android:layout_centerVertical="true"
+                android:textAllCaps="false"
+                android:textSize="@dimen/text_size_14"
+                android:visibility="gone"
+                android:textColor="@color/white"
+                android:background="@color/planColor2"/>
 
         </LinearLayout>
     </RelativeLayout>

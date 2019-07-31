@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import static com.example.testproject.Utils.Const.patternArrayList;
 
 public class TestInstructionActivity extends AppCompatActivity {
-    TextView tv_total_ques, tv_total_time, tv_total_mark, tv_mode_change,tv_mode_msg;
+    TextView tv_total_ques, tv_total_time, tv_total_mark, tv_mode_change, tv_mode_msg;
     RecyclerView rv_pattern_name;
     Button btn_start_test;
     TestPatternAdapter testPatternAdapter;
@@ -51,9 +51,10 @@ public class TestInstructionActivity extends AppCompatActivity {
     RelativeLayout relativeLayout;
     Button btn_save_test;
     RadioGroup rg_mode;
-    RadioButton rb_mode_a,rb_mode_b;
+    RadioButton rb_mode_a, rb_mode_b;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
+    boolean wasPaused;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,12 +75,13 @@ public class TestInstructionActivity extends AppCompatActivity {
         btn_start_test = findViewById(R.id.btn_start_test);
         spinner_lang = findViewById(R.id.spinner_lang);
         tv_mode_change = findViewById(R.id.tv_mode_change);
-        relativeLayout=findViewById(R.id.relativeLayout);
-        tv_mode_msg=findViewById(R.id.tv_mode_msg);
+        relativeLayout = findViewById(R.id.relativeLayout);
+        tv_mode_msg = findViewById(R.id.tv_mode_msg);
         ll_below_start_test = findViewById(R.id.ll_below_start_test);
         testPatternAdapter = new TestPatternAdapter(context, patternArrayList);
         rv_pattern_name.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayout.VERTICAL, false));
         rv_pattern_name.setAdapter(testPatternAdapter);
+        wasPaused = getIntent().getBooleanExtra("was_paused", false);
         tv_total_ques.setText(getIntent().getStringExtra("total_question"));
         tv_total_time.setText(getIntent().getStringExtra("total_time"));
         tv_total_mark.setText(getIntent().getStringExtra("total_marks"));
@@ -98,10 +100,11 @@ public class TestInstructionActivity extends AppCompatActivity {
         btn_start_test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (tv_mode_msg.getText().toString().equalsIgnoreCase("Mode A (Actual Exam Setting)")){
+                if (tv_mode_msg.getText().toString().equalsIgnoreCase("Mode A (Actual Exam Setting)")) {
                     if (getIntent().getStringExtra("changable").equalsIgnoreCase("1")) {
                         Intent intent = new Intent(context, FullTestQuizActivity.class);
                         intent.putExtra("quiz_id", getIntent().getStringExtra("quiz_id"));
+                        intent.putExtra("was_paused", wasPaused);
                         intent.putExtra("quiz_name", getIntent().getStringExtra("quiz_name"));
                         intent.putExtra("time", getIntent().getStringExtra("total_time"));
                         intent.putExtra("changable", getIntent().getStringExtra("changable"));
@@ -109,12 +112,13 @@ public class TestInstructionActivity extends AppCompatActivity {
                         intent.putExtra("total_quiz_question", getIntent().getStringExtra("total_question"));
                         startActivity(intent);
                         finish();
-                        editor.putString("mode_change","modeChangable");
+                        editor.putString("mode_change", "modeChangable");
                         editor.apply();
 
                     } else {
                         Intent intent = new Intent(context, FullNotChangeTestQuizActivity.class);
                         intent.putExtra("quiz_id", getIntent().getStringExtra("quiz_id"));
+                        intent.putExtra("was_paused", wasPaused);
                         intent.putExtra("quiz_name", getIntent().getStringExtra("quiz_name"));
                         intent.putExtra("time", getIntent().getStringExtra("total_time"));
                         intent.putExtra("changable", getIntent().getStringExtra("changable"));
@@ -122,12 +126,13 @@ public class TestInstructionActivity extends AppCompatActivity {
                         intent.putExtra("total_quiz_question", getIntent().getStringExtra("total_question"));
                         startActivity(intent);
                         finish();
-                        editor.putString("mode_change","modeNotchangable");
+                        editor.putString("mode_change", "modeNotchangable");
                         editor.apply();
                     }
-                }else {
+                } else {
                     Intent intent = new Intent(context, FullTestQuizActivity.class);
                     intent.putExtra("quiz_id", getIntent().getStringExtra("quiz_id"));
+                    intent.putExtra("was_paused", wasPaused);
                     intent.putExtra("quiz_name", getIntent().getStringExtra("quiz_name"));
                     intent.putExtra("time", getIntent().getStringExtra("total_time"));
                     intent.putExtra("changable", getIntent().getStringExtra("changable"));
@@ -135,7 +140,7 @@ public class TestInstructionActivity extends AppCompatActivity {
                     intent.putExtra("remain_time", getIntent().getStringExtra("remain_time"));
                     startActivity(intent);
                     finish();
-                    editor.putString("mode_change","modeChangable");
+                    editor.putString("mode_change", "modeChangable");
                     editor.apply();
                 }
             }
@@ -143,9 +148,10 @@ public class TestInstructionActivity extends AppCompatActivity {
         ll_below_start_test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (tv_mode_msg.getText().toString().equalsIgnoreCase("Mode A (Actual Exam Setting)")){
+                if (tv_mode_msg.getText().toString().equalsIgnoreCase("Mode A (Actual Exam Setting)")) {
                     if (getIntent().getStringExtra("changable").equalsIgnoreCase("1")) {
                         Intent intent = new Intent(context, FullTestQuizActivity.class);
+                        intent.putExtra("was_paused", wasPaused);
                         intent.putExtra("quiz_id", getIntent().getStringExtra("quiz_id"));
                         intent.putExtra("quiz_name", getIntent().getStringExtra("quiz_name"));
                         intent.putExtra("time", getIntent().getStringExtra("total_time"));
@@ -156,6 +162,7 @@ public class TestInstructionActivity extends AppCompatActivity {
 
                     } else {
                         Intent intent = new Intent(context, FullNotChangeTestQuizActivity.class);
+                        intent.putExtra("was_paused", wasPaused);
                         intent.putExtra("quiz_id", getIntent().getStringExtra("quiz_id"));
                         intent.putExtra("quiz_name", getIntent().getStringExtra("quiz_name"));
                         intent.putExtra("time", getIntent().getStringExtra("total_time"));
@@ -164,8 +171,9 @@ public class TestInstructionActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     }
-                }else {
+                } else {
                     Intent intent = new Intent(context, FullTestQuizActivity.class);
+                    intent.putExtra("was_paused", wasPaused);
                     intent.putExtra("quiz_id", getIntent().getStringExtra("quiz_id"));
                     intent.putExtra("quiz_name", getIntent().getStringExtra("quiz_name"));
                     intent.putExtra("time", getIntent().getStringExtra("total_time"));
@@ -197,16 +205,16 @@ public class TestInstructionActivity extends AppCompatActivity {
                 popupWindow.setFocusable(true);
                 popupWindow.setOutsideTouchable(true);
                 popupWindow.showAtLocation(relativeLayout, Gravity.CENTER, 0, 0);
-                rg_mode=customView.findViewById(R.id.rg_mode);
-                rb_mode_a=customView.findViewById(R.id.rb_mode_a);
-                rb_mode_b=customView.findViewById(R.id.rb_mode_b);
-                btn_save_test=customView.findViewById(R.id.btn_save_test);
-                if (tv_mode_msg.getText().toString().equalsIgnoreCase("Mode A (Actual Exam Setting)")){
+                rg_mode = customView.findViewById(R.id.rg_mode);
+                rb_mode_a = customView.findViewById(R.id.rb_mode_a);
+                rb_mode_b = customView.findViewById(R.id.rb_mode_b);
+                btn_save_test = customView.findViewById(R.id.btn_save_test);
+                if (tv_mode_msg.getText().toString().equalsIgnoreCase("Mode A (Actual Exam Setting)")) {
                     tv_mode_msg.setText(getResources().getString(R.string.modeAMsg));
                     rb_mode_a.setChecked(true);
                     rb_mode_b.setChecked(false);
 
-                }else {
+                } else {
                     rb_mode_b.setChecked(true);
                     rb_mode_a.setChecked(false);
 
@@ -232,11 +240,11 @@ public class TestInstructionActivity extends AppCompatActivity {
                 btn_save_test.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (rb_mode_a.isChecked()){
+                        if (rb_mode_a.isChecked()) {
                             popupWindow.dismiss();
                             tv_mode_msg.setText(getResources().getString(R.string.modeAMsg));
 
-                        }else {
+                        } else {
                             rb_mode_b.setChecked(true);
                             rb_mode_a.setChecked(false);
                             popupWindow.dismiss();
@@ -262,6 +270,7 @@ public class TestInstructionActivity extends AppCompatActivity {
             }
         });
     }
+
     private static void dimBehind(PopupWindow popupWindow) {
         View container;
         if (popupWindow.getBackground() == null) {

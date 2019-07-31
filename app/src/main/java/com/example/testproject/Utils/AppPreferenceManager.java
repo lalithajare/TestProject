@@ -1,94 +1,125 @@
 package com.example.testproject.Utils;
 
-import android.os.Bundle;
+import android.text.TextUtils;
 
-import com.example.testproject.Model.FullQuestionSetGet;
 import com.example.testproject.common.MyApplication;
-import com.example.testproject.database.models.Course;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
 
 public class AppPreferenceManager {
 
-    private static final String TEST_RESPONSE = "test_repsonse";
-    private static final String TEST_TIME = "test_time";
-    private static final String TEST_VALUES = "test_values";
-    private static final String TEST_TOPIC_RESPONSE = "test_topic_values";
+    private static final String DELIMITER = "~";
 
+    private static final String SAVED_QUIZES_STATES = "quizes_ids_and_times_page_index";
+    private static final String SAVED_QUIZES_OFFLINE_ATTEMPT_STATES = "quizes_offline_attempts";
 
-    public static void saveExam(JSONObject testJSON) {
-        MyApplication.getAppInstance()
+    public static void addQuizState(String quizId, String quizPauseTime, String pagerIndex) {
+
+        Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .edit().putString(TEST_RESPONSE, testJSON.toString()).apply();
-    }
-
-
-    public static JSONObject getExam() {
-        String testResponse = MyApplication.getAppInstance()
-                .getSharedPreferences()
-                .getString(TEST_RESPONSE, "");
-        try {
-            return new JSONObject(testResponse);
-        } catch (JSONException e) {
-            e.printStackTrace();
+                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+        for (String state : savedQuizStates) {
+            if (TextUtils.equals(state.split(DELIMITER)[0], quizId)) {
+                savedQuizStates.remove(state);
+                break;
+            }
         }
-        return null;
-    }
-
-    public static void saveExamTopic(JSONObject testJSON) {
+        savedQuizStates.add(quizId + DELIMITER + quizPauseTime + DELIMITER + pagerIndex);
         MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .edit().putString(TEST_TOPIC_RESPONSE, testJSON.toString()).apply();
+                .edit().putStringSet(SAVED_QUIZES_STATES, savedQuizStates).apply();
     }
 
-
-    public static JSONObject getExamTopic() {
-        String testResponse = MyApplication.getAppInstance()
-                .getSharedPreferences()
-                .getString(TEST_TOPIC_RESPONSE, "");
-        try {
-            return new JSONObject(testResponse);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static void saveTimerValue(String time) {
-        MyApplication.getAppInstance()
-                .getSharedPreferences()
-                .edit().putString(TEST_TIME, time).apply();
-    }
-
-    public static String getTimerValue() {
+    public static Set<String> getQuizStates() {
         return MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .getString(TEST_TIME, "");
+                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
     }
 
-    public static void saveOfflineValues(Bundle bundle) {
-        MyApplication.getAppInstance()
+    public static boolean isQuizStateExists(String quizId) {
+        Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .edit().putString(TEST_VALUES, new Gson().toJson(bundle)).apply();
+                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+        for (String states : savedQuizStates) {
+            if (TextUtils.equals(states.split(DELIMITER)[0], quizId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public static Bundle getOfflineValues() {
-        String strValues = MyApplication.getAppInstance()
+    //return time in HH:mm:ss
+    public static String getQuizPauseTime(String quizId) {
+        Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .getString(TEST_VALUES, "");
-        return new Gson().fromJson(strValues, Bundle.class);
+                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+        for (String states : savedQuizStates) {
+            if (TextUtils.equals(states.split(DELIMITER)[0], quizId)) {
+                return states.split(DELIMITER)[1];
+            }
+        }
+        return null;
     }
 
-    public static void clearPrefs() {
-        MyApplication.getAppInstance()
+    //return time in HH:mm:ss
+    public static String getQuizPageIndex(String quizId) {
+        Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .edit().clear();
+                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+        for (String states : savedQuizStates) {
+            if (TextUtils.equals(states.split(DELIMITER)[0], quizId)) {
+                return states.split(DELIMITER)[2];
+            }
+        }
+        return null;
+    }
+
+
+    public static void deleteTestState(String quizId) {
+        Set<String> savedQuizStates = MyApplication.getAppInstance()
+                .getSharedPreferences()
+                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+
+        HashMap<String, ArrayList<Hashtable<String, String>>> attemptStates = getAllTestsAndOfflineAttemptStates();
+
+        for (String state : savedQuizStates) {
+            if (TextUtils.equals(state.split(DELIMITER)[0], quizId)) {
+                savedQuizStates.remove(state);
+                MyApplication.getAppInstance()
+                        .getSharedPreferences()
+                        .edit().putStringSet(SAVED_QUIZES_STATES, savedQuizStates).apply();
+                break;
+            }
+        }
+        attemptStates.remove(quizId);
+        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_QUIZES_OFFLINE_ATTEMPT_STATES, new Gson().toJson(attemptStates)).apply();
+    }
+
+    public static void saveOfflineAttemptStates(String quizId, ArrayList<Hashtable<String, String>> offlineAttempts) {
+        HashMap<String, ArrayList<Hashtable<String, String>>> attemptStates = getAllTestsAndOfflineAttemptStates();
+        attemptStates.put(quizId, offlineAttempts);
+        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_QUIZES_OFFLINE_ATTEMPT_STATES, new Gson().toJson(attemptStates)).apply();
+    }
+
+    public static HashMap<String, ArrayList<Hashtable<String, String>>> getAllTestsAndOfflineAttemptStates() {
+        java.lang.reflect.Type type = new TypeToken<HashMap<String, ArrayList<Hashtable<String, String>>>>() {
+        }.getType();
+        return new Gson().fromJson(MyApplication.getAppInstance()
+                .getSharedPreferences()
+                .getString(SAVED_QUIZES_OFFLINE_ATTEMPT_STATES, new Gson().toJson(new HashMap<String, ArrayList<Hashtable<String, String>>>())), type);
+    }
+
+    public static ArrayList<Hashtable<String, String>> getOfflineAttemptState(String quizId) {
+        HashMap<String, ArrayList<Hashtable<String, String>>> attemptStates = getAllTestsAndOfflineAttemptStates();
+        if (attemptStates != null)
+            return attemptStates.get(quizId);
+        return null;
     }
 
 }
