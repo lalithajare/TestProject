@@ -51,22 +51,22 @@ public class SolutionAnswerAdapter extends RecyclerView.Adapter<SolutionAnswerAd
         viewHolder.ans_body.loadDataWithBaseURL(null, ansSolutionList.get(position).getSolution_answer(), "text/html", "utf-8", null);
        // viewHolder.radioButton.setText("("+(char)(no+'A'-1)+ ")  "+htmlAsSpanned);
         if (ansSolutionList.get(position).getSolution_answer_status().equalsIgnoreCase("1")){
-            //viewHolder.radioButton.setBackground(context.getResources().getDrawable(R.drawable.answer_right_selector));
+            //viewHolder.radioButton.setBackground(mContext.getResources().getDrawable(R.drawable.answer_right_selector));
             viewHolder.rl_ans.setBackground(context.getResources().getDrawable( R.drawable.answer_right_selector));
             viewHolder.ans_body.setBackgroundColor(Color.parseColor("#D6FFD7"));
 
         }else if (ansSolutionList.get(position).getSolution_student_answer().equalsIgnoreCase("2")){
-           // viewHolder.radioButton.setBackground(context.getResources().getDrawable(R.drawable.answer_wrong_selector));
+           // viewHolder.radioButton.setBackground(mContext.getResources().getDrawable(R.drawable.answer_wrong_selector));
             viewHolder.rl_ans.setBackground(context.getResources().getDrawable( R.drawable.answer_wrong_selector));
             viewHolder.ans_body.setBackgroundColor(Color.parseColor("#FFD5D5"));
 
         }else if (ansSolutionList.get(position).getSolution_student_answer().equalsIgnoreCase("1")){
-            //viewHolder.radioButton.setBackground(context.getResources().getDrawable(R.drawable.answer_right_selector));
+            //viewHolder.radioButton.setBackground(mContext.getResources().getDrawable(R.drawable.answer_right_selector));
             viewHolder.rl_ans.setBackground(context.getResources().getDrawable( R.drawable.answer_right_selector));
             viewHolder.ans_body.setBackgroundColor(Color.parseColor("#D6FFD7"));
 
         }else {
-           // viewHolder.radioButton.setBackground(context.getResources().getDrawable(R.drawable.b));
+           // viewHolder.radioButton.setBackground(mContext.getResources().getDrawable(R.drawable.b));
             viewHolder.rl_ans.setBackground(context.getResources().getDrawable( R.drawable.b));
             viewHolder.ans_body.setBackgroundColor(Color.parseColor("#FFFFFF"));
 

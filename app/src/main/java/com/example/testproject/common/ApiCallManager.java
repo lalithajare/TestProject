@@ -13,7 +13,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.testproject.URLs.UrlsAvision;
 import com.example.testproject.Utils.AppWebService;
-import com.example.testproject.database.models.Category;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -139,55 +138,6 @@ public class ApiCallManager {
     //************************************************************************************************************
 
 //**********************************************************************************************************************************
-
-    //************************************************************************************************************
-    //******************************************* QUIZ API ***************************************************
-    //************************************************************************************************************
-
-    public void callQuizAPI(final Category category, final ApiResponseListener listener) {
-        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject object = new JSONObject(response);
-                    String status = object.getString("status_code");
-                    String message = object.getString("message");
-                    Log.e("onResponse: ", status);
-                    if (status.equalsIgnoreCase("200")) {
-                        JSONArray jsonArray = object.getJSONArray("question_list");
-                        listener.onSuccess(jsonArray.toString());
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                listener.onError(error);
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new Hashtable<>();
-                params.put("category_id", category.getCategoryId());
-                params.put("student_id", "6");
-                params.put("section_id", category.getSectionId());
-                params.put("question_year_stat", "0");
-                Log.d("category_id", "getParams: " + params);
-                return params;
-            }
-        };
-
-        request.setRetryPolicy(new DefaultRetryPolicy(10000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        AppWebService.getInstance(mContext).addToRequestQueue(request);
-    }
-
-    //************************************************************************************************************
-    //******************************************* QUIZ API ***************************************************
-    //************************************************************************************************************
 
 
     public void callSubmitAnswerAPI(final String testId, final String questId, final String answersId, final ApiResponseListener listener) {

@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    lintOptions {
-//        checkReleaseBuilds false
-        // Or, if you prefer, you can continue to check for errors in release builds,
-        // but continue the build even when errors are found:
-        abortOnError false
-    }
+
     compileSdkVersion 28
+
+    lintOptions {
+        checkReleaseBuilds false
+    }
+
     defaultConfig {
         applicationId "com.example.testproject"
         minSdkVersion 16
@@ -26,9 +26,9 @@ android {
     signingConfigs {
         release {
             storeFile file("testproject-release.jks")
-            storePassword "testproject"
-            keyAlias "testproject"
-            keyPassword "testproject"
+            storePassword 'testproject'
+            keyAlias 'testproject'
+            keyPassword 'testproject'
         }
     }
 
@@ -36,6 +36,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
