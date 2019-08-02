@@ -121,7 +121,7 @@
                         android:layout_toLeftOf="@+id/iv_review"
                         android:layout_toRightOf="@+id/spinner_topic"
                         android:gravity="center"
-                        android:visibility="gone">
+                        android:visibility="visible">
 
                         <TextView
                             android:id="@+id/tv_eng"

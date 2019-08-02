@@ -16,36 +16,32 @@ public class AppPreferenceManager {
 
     private static final String DELIMITER = "~";
 
-    private static final String SAVED_QUIZES_STATES = "quizes_ids_and_times_page_index";
-    private static final String SAVED_QUIZES_OFFLINE_ATTEMPT_STATES = "quizes_offline_attempts";
+    private static final String SAVED_TOPIC_STATES = "quizes_ids_and_times_page_index";
+    private static final String SAVED_TOPICS_OFFLINE_ATTEMPT_STATES = "quizes_offline_attempts";
 
-    public static void addQuizState(String quizId, String quizPauseTime, String pagerIndex) {
+    private static final String MAP_QUIZ_TOPIC = "quiz_topic";
+
+    public static void addTopicState(String quizId, String topicId, String quizPauseTime, String pagerIndex) {
 
         Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+                .getStringSet(SAVED_TOPIC_STATES, new HashSet<String>());
         for (String state : savedQuizStates) {
-            if (TextUtils.equals(state.split(DELIMITER)[0], quizId)) {
+            if (TextUtils.equals(state.split(DELIMITER)[0], quizId) && TextUtils.equals(state.split(DELIMITER)[1], topicId)) {
                 savedQuizStates.remove(state);
                 break;
             }
         }
-        savedQuizStates.add(quizId + DELIMITER + quizPauseTime + DELIMITER + pagerIndex);
+        savedQuizStates.add(quizId + DELIMITER + topicId + DELIMITER + quizPauseTime + DELIMITER + pagerIndex);
         MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .edit().putStringSet(SAVED_QUIZES_STATES, savedQuizStates).apply();
-    }
-
-    public static Set<String> getQuizStates() {
-        return MyApplication.getAppInstance()
-                .getSharedPreferences()
-                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+                .edit().putStringSet(SAVED_TOPIC_STATES, savedQuizStates).apply();
     }
 
     public static boolean isQuizStateExists(String quizId) {
         Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+                .getStringSet(SAVED_TOPIC_STATES, new HashSet<String>());
         for (String states : savedQuizStates) {
             if (TextUtils.equals(states.split(DELIMITER)[0], quizId)) {
                 return true;
@@ -54,57 +50,70 @@ public class AppPreferenceManager {
         return false;
     }
 
-    //return time in HH:mm:ss
-    public static String getQuizPauseTime(String quizId) {
+    public static boolean isQuizTopicStateExists(String quizId, String topicId) {
         Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+                .getStringSet(SAVED_TOPIC_STATES, new HashSet<String>());
         for (String states : savedQuizStates) {
-            if (TextUtils.equals(states.split(DELIMITER)[0], quizId)) {
-                return states.split(DELIMITER)[1];
+            if (TextUtils.equals(states.split(DELIMITER)[0], quizId) && TextUtils.equals(states.split(DELIMITER)[1], topicId)) {
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     //return time in HH:mm:ss
-    public static String getQuizPageIndex(String quizId) {
+    public static String getTopicPauseTime(String quizId, String topicId) {
         Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+                .getStringSet(SAVED_TOPIC_STATES, new HashSet<String>());
         for (String states : savedQuizStates) {
-            if (TextUtils.equals(states.split(DELIMITER)[0], quizId)) {
+            if (TextUtils.equals(states.split(DELIMITER)[0], quizId) && TextUtils.equals(states.split(DELIMITER)[1], topicId)) {
                 return states.split(DELIMITER)[2];
             }
         }
         return null;
     }
 
-
-    public static void deleteTestState(String quizId) {
+    //return time in HH:mm:ss
+    public static String getTopicPageIndex(String quizId, String topicId) {
         Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .getStringSet(SAVED_QUIZES_STATES, new HashSet<String>());
+                .getStringSet(SAVED_TOPIC_STATES, new HashSet<String>());
+        for (String states : savedQuizStates) {
+            if (TextUtils.equals(states.split(DELIMITER)[0], quizId) && TextUtils.equals(states.split(DELIMITER)[1], topicId)) {
+                return states.split(DELIMITER)[3];
+            }
+        }
+        return null;
+    }
+
+
+    public static void deleteTestState(String quizId, String topicId) {
+        Set<String> savedQuizStates = MyApplication.getAppInstance()
+                .getSharedPreferences()
+                .getStringSet(SAVED_TOPIC_STATES, new HashSet<String>());
 
         HashMap<String, ArrayList<Hashtable<String, String>>> attemptStates = getAllTestsAndOfflineAttemptStates();
 
         for (String state : savedQuizStates) {
-            if (TextUtils.equals(state.split(DELIMITER)[0], quizId)) {
+            if (TextUtils.equals(state.split(DELIMITER)[0], quizId)
+                    && TextUtils.equals(state.split(DELIMITER)[1], topicId)) {
                 savedQuizStates.remove(state);
                 MyApplication.getAppInstance()
                         .getSharedPreferences()
-                        .edit().putStringSet(SAVED_QUIZES_STATES, savedQuizStates).apply();
+                        .edit().putStringSet(SAVED_TOPIC_STATES, savedQuizStates).apply();
                 break;
             }
         }
         attemptStates.remove(quizId);
-        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_QUIZES_OFFLINE_ATTEMPT_STATES, new Gson().toJson(attemptStates)).apply();
+        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_TOPICS_OFFLINE_ATTEMPT_STATES, new Gson().toJson(attemptStates)).apply();
     }
 
-    public static void saveOfflineAttemptStates(String quizId, ArrayList<Hashtable<String, String>> offlineAttempts) {
+    public static void saveOfflineAttemptStates(String quizId, String topicId, ArrayList<Hashtable<String, String>> offlineAttempts) {
         HashMap<String, ArrayList<Hashtable<String, String>>> attemptStates = getAllTestsAndOfflineAttemptStates();
-        attemptStates.put(quizId, offlineAttempts);
-        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_QUIZES_OFFLINE_ATTEMPT_STATES, new Gson().toJson(attemptStates)).apply();
+        attemptStates.put(quizId + DELIMITER + topicId, offlineAttempts);
+        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_TOPICS_OFFLINE_ATTEMPT_STATES, new Gson().toJson(attemptStates)).apply();
     }
 
     public static HashMap<String, ArrayList<Hashtable<String, String>>> getAllTestsAndOfflineAttemptStates() {
@@ -112,13 +121,13 @@ public class AppPreferenceManager {
         }.getType();
         return new Gson().fromJson(MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .getString(SAVED_QUIZES_OFFLINE_ATTEMPT_STATES, new Gson().toJson(new HashMap<String, ArrayList<Hashtable<String, String>>>())), type);
+                .getString(SAVED_TOPICS_OFFLINE_ATTEMPT_STATES, new Gson().toJson(new HashMap<String, ArrayList<Hashtable<String, String>>>())), type);
     }
 
-    public static ArrayList<Hashtable<String, String>> getOfflineAttemptState(String quizId) {
+    public static ArrayList<Hashtable<String, String>> getOfflineAttemptState(String quizId, String topicId) {
         HashMap<String, ArrayList<Hashtable<String, String>>> attemptStates = getAllTestsAndOfflineAttemptStates();
         if (attemptStates != null)
-            return attemptStates.get(quizId);
+            return attemptStates.get(quizId + DELIMITER + topicId);
         return null;
     }
 

@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,6 +21,7 @@ import com.example.testproject.Adapter.BigGridReviewAdapter;
 import com.example.testproject.Adapter.BigRecycleReviewAdapter;
 import com.example.testproject.R;
 import com.example.testproject.Utils.Const;
+import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.InternetCheck;
 
 import java.text.SimpleDateFormat;
@@ -42,9 +45,13 @@ public class FullTestQuizActivity extends ParentQuizActivity {
 
         spinner_topic.setEnabled(true);
         spinner_review.setEnabled(true);
+
         pref = mContext.getSharedPreferences("HashValue", Context.MODE_PRIVATE);
         editor = pref.edit();
         editor.apply();
+
+        setViews();
+
     }
 
     @Override
@@ -264,6 +271,47 @@ public class FullTestQuizActivity extends ParentQuizActivity {
         });
     }
 
+    //Timer Changed
+    @Override
+    protected void startChangebleTimer(final float minute) {
+        customCountDownTimer = new CustomCountDownTimer((long) (60 * minute * 1000), 500, true) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long seconds = millisUntilFinished / 1000;
+                tv_total_time.setText(String.format("%02d", seconds / 3600) + ":" + String.format("%02d", (seconds % 3600) / 60) + ":" + String.format("%02d", seconds % 60));
+            }
+
+            @Override
+            public void onFinish() {
+                if (tv_total_time.getText().equals("00:00:00")) {
+                    if (submitButton.getVisibility() == View.VISIBLE) {
+                        submitButton.setVisibility(View.GONE);
+                        submitButton.setText("Save & Next");
+                    }
+
+                    if (attemptedOfflineQuestions.isEmpty()) {
+                        if (customCountDownTimer != null) {
+                            customCountDownTimer.cancel();
+                            customCountDownTimer = null;
+                        }
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                callFinishTestAPI();
+                            }
+                        }, 500);
+                    } else {
+                        Hashtable<String, String> attempt = attemptedOfflineQuestions.get(attemptedOfflineQuestions.size() - 1);
+                        mOfflineAttemptsDialogue.show();
+                        submitOfflineAnswersAndFinish(attempt.get("test_id"), attempt.get("qus_id"), attempt.get("answers_id"));
+                        attemptedOfflineQuestions.remove(attempt);
+                    }
+                }
+            }
+        };
+        customCountDownTimer.create();
+    }
+
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(drawerView)) {
@@ -290,7 +338,10 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                         customCountDownTimer = null;
                     }
 
-                    saveTestState();
+                    if (quesList != null && !quesList.isEmpty()) {
+                        saveTestState();
+                    }
+
                     finish();
                 }
             });

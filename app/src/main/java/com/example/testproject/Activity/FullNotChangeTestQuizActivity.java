@@ -3,10 +3,13 @@ package com.example.testproject.Activity;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,6 +22,7 @@ import com.example.testproject.Adapter.BigRecycleReviewAdapter;
 import com.example.testproject.R;
 import com.example.testproject.Utils.Const;
 
+import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.InternetCheck;
 
 import java.text.SimpleDateFormat;
@@ -36,9 +40,11 @@ public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_test_quiz);
         mContext = FullNotChangeTestQuizActivity.this;
+
         spinner_topic.setEnabled(false);
         spinner_review.setEnabled(false);
 
+        setViews();
     }
 
     @Override
@@ -243,6 +249,50 @@ public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
     }
 
     @Override
+    protected void startChangebleTimer(final float minute) {
+        customCountDownTimer = new CustomCountDownTimer((long) (60 * minute * 1000), 500, true) {
+            @SuppressLint({"DefaultLocale", "SetTextI18n"})
+            @Override
+            public void onTick(long leftTimeInMilliseconds) {
+                long seconds = leftTimeInMilliseconds / 1000;
+
+                tv_total_time.setText(String.format("%02d", seconds / 3600) + ":" + String.format("%02d", (seconds % 3600) / 60) + ":" + String.format("%02d", seconds % 60));
+
+            }
+
+            @SuppressLint({"SetTextI18n", "SimpleDateFormat"})
+            @Override
+            public void onFinish() {
+                if (tv_total_time.getText().equals("00:00:00")) {
+                    if (spinner_topic.getSelectedItemPosition() == Const.QUIZ_LENGTH - 1) {
+
+                        startActivity(new Intent(FullNotChangeTestQuizActivity.this, ResultPannelActivity.class));
+                        customCountDownTimer.cancel();
+                        Const.answerStoreHash.clear();
+                        Const.answerQuestionStoreHash.clear();
+                        Const.questionAnswerStoreHash.clear();
+                        Const.hashMapSelected.clear();
+                        Const.hashMapMarkSelected.clear();
+                        Const.hashMapSelectMarkReview.clear();
+                        Const.answerCheckHash.clear();
+                        finish();
+                    } else {
+                        if (submitButton.getVisibility() == View.VISIBLE) {
+                            submitButton.setVisibility(View.GONE);
+                            submitButton.setText("Save & Next");
+                        }
+                        submitButton.setVisibility(View.GONE);
+                        submitButton.setText("Save & Next");
+                        spinner_topic.setSelection(spinner_topic.getSelectedItemPosition() + 1);
+
+                    }
+                }
+            }
+        };
+        customCountDownTimer.create();
+    }
+
+    @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(drawerView)) {
             drawerLayout.closeDrawer(drawerView);
@@ -268,7 +318,10 @@ public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
                         customCountDownTimer = null;
                     }
 
-                    saveTestState();
+                    if (quesList != null && !quesList.isEmpty()) {
+                        saveTestState();
+                    }
+
                     finish();
                 }
             });

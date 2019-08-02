@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "No internet", Toast.LENGTH_SHORT).show();
         }
     }
+
     private void getExamTopic() {
         StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_COURSE, new Response.Listener<String>() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
