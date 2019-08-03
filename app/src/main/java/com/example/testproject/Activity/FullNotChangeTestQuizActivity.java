@@ -38,12 +38,9 @@ public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
     protected void onCreate(Bundle savedInstanceState) {
         TAG = FullTestQuizActivity.class.getSimpleName();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_full_test_quiz);
         mContext = FullNotChangeTestQuizActivity.this;
-
         spinner_topic.setEnabled(false);
         spinner_review.setEnabled(false);
-
         setViews();
     }
 

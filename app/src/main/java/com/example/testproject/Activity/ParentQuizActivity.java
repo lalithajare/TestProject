@@ -240,69 +240,16 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
                 try {
-                    JSONObject object = new JSONObject(response);
-                    Log.d("FullResponse", "onResponse: " + response);
-                    String status = object.getString("status_code");
-                    String message = object.getString("message");
-                    if (status.equalsIgnoreCase("200")) {
-                        JSONObject msgObject = object.getJSONObject("message");
-                        Const.STUDENT_TEST_ID = msgObject.getString("student_test_id");
-                        JSONArray jsonArray = msgObject.getJSONArray("quiz_dtls");
-                        topicList.clear();
-                        strings.clear();
-                        FullTopicTest fullTopicTest;
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject object1 = jsonArray.getJSONObject(i);
-                            fullTopicTest = new FullTopicTest(object1.getString("type_id"), object1.getString("type_name"),
-                                    object1.getString("duration"), object1.getString("total_question"),
-                                    object1.getString("count"));
+                    parseTopicResponse(response);
 
-                            topicList.add(fullTopicTest);
-                            strings.add(topicList.get(i).full_length_type_name);
-                        }
+                    setTopicsUI();
 
-                        adapter = new ArrayAdapter<String>(Objects.requireNonNull(getApplicationContext()), R.layout.free_spinner_layout, strings);
-                        spinner_topic.setAdapter(adapter);
-                        spinner_topic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-
-                                if (quesList != null && !quesList.isEmpty()) {
-                                    saveTestState();
-                                    attemptedOfflineQuestions.clear();
-                                }
-
-                                Const.TYPE_ID = topicList.get(position).full_length_type_id;
-                                Const.TYPE_NAME = topicList.get(position).full_length_type_name;
-
-
-                                if (submitButton.getVisibility() == View.VISIBLE) {
-                                    submitButton.setVisibility(View.GONE);
-                                    submitButton.setText("Save & Next");
-                                }
-                                rl_ques.setVisibility(View.GONE);
-
-                                callFullChangeTestQuesAPI();
-
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-
-                            }
-                        });
-
-                        if (wasPaused) {
-                            resumeTime();
-                        } else {
-                            startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
-                        }
-
+                    if (wasPaused) {
+                        resumeTime();
                     } else {
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-                        spinner_topic.setVisibility(View.GONE);
-
+                        startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
                     }
+
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -334,6 +281,66 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         AppWebService.getInstance(getApplicationContext()).addToRequestQueue(request);
+    }
+
+    private void setTopicsUI() {
+        adapter = new ArrayAdapter(ParentQuizActivity.this, R.layout.free_spinner_layout, strings);
+        spinner_topic.setAdapter(adapter);
+        spinner_topic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+
+                if (quesList != null && !quesList.isEmpty()) {
+                    saveTestState();
+                    attemptedOfflineQuestions.clear();
+                }
+
+                Const.TYPE_ID = topicList.get(position).full_length_type_id;
+                Const.TYPE_NAME = topicList.get(position).full_length_type_name;
+
+                if (submitButton.getVisibility() == View.VISIBLE) {
+                    submitButton.setVisibility(View.GONE);
+                    submitButton.setText("Save & Next");
+                }
+                rl_ques.setVisibility(View.GONE);
+
+                callFullChangeTestQuesAPI();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private void parseTopicResponse(String response) throws JSONException {
+        JSONObject object = new JSONObject(response);
+        Log.d("FullResponse", "onResponse: " + response);
+        String status = object.getString("status_code");
+        String message = object.getString("message");
+        if (status.equalsIgnoreCase("200")) {
+            JSONObject msgObject = object.getJSONObject("message");
+            Const.STUDENT_TEST_ID = msgObject.getString("student_test_id");
+            JSONArray jsonArray = msgObject.getJSONArray("quiz_dtls");
+            topicList.clear();
+            strings.clear();
+            FullTopicTest fullTopicTest;
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject object1 = jsonArray.getJSONObject(i);
+                fullTopicTest = new FullTopicTest(object1.getString("type_id"), object1.getString("type_name"),
+                        object1.getString("duration"), object1.getString("total_question"),
+                        object1.getString("count"));
+
+                topicList.add(fullTopicTest);
+                strings.add(topicList.get(i).full_length_type_name);
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            spinner_topic.setVisibility(View.GONE);
+
+        }
     }
 
     protected void callFullChangeTestQuesAPI() {
