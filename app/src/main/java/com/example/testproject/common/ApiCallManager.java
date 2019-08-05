@@ -183,6 +183,52 @@ public class ApiCallManager {
         AppWebService.getInstance(MyApplication.getAppInstance()).addToRequestQueue(request);
     }
 
+//**********************************************************************************************************************************
+
+    //      Gets all the questions in a Quiz Topic wise
+    //------------------------------------------------
+
+    public void callTopicWiseQuestionsAPI(final String quizId, final ApiResponseListener listener) {
+        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ_ALL_QUES, new Response.Listener<String>() {
+            @SuppressLint("SimpleDateFormat")
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    String status = jsonObject.getString("status_code");
+                    String message = jsonObject.getString("message");
+                    Log.e("Result Status", status);
+                    listener.onSuccess(response);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                listener.onError(error);
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new Hashtable<>();
+                params.put("quiz_id", quizId);
+                Log.d("SubmitFullAnswerValue", "getParams: " + params);
+                return params;
+            }
+        };
+
+        request.setRetryPolicy(new DefaultRetryPolicy(50000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        AppWebService.getInstance(MyApplication.getAppInstance()).addToRequestQueue(request);
+    }
+
+//**********************************************************************************************************************************
+
+
     public interface ApiResponseListener {
         void onSuccess(String response);
 

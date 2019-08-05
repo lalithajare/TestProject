@@ -93,15 +93,14 @@ public class AppPreferenceManager {
     }
 
 
-    public static void deleteTestState(String quizId, String topicId) {
+    public static void deleteQuizState(String quizId) {
 
         //Delete quiz states
         Set<String> savedQuizStates = MyApplication.getAppInstance()
                 .getSharedPreferences()
                 .getStringSet(SAVED_TOPIC_STATES, new HashSet<String>());
         for (String state : savedQuizStates) {
-            if (TextUtils.equals(state.split(DELIMITER)[0], quizId)
-                    && TextUtils.equals(state.split(DELIMITER)[1], topicId)) {
+            if (TextUtils.equals(state.split(DELIMITER)[0], quizId)) {
                 savedQuizStates.remove(state);
                 MyApplication.getAppInstance()
                         .getSharedPreferences()
@@ -111,23 +110,28 @@ public class AppPreferenceManager {
         }
 
         //Delete offline attempts
-        HashMap<String, ArrayList<Hashtable<String, String>>> attempts = new HashMap<>();
+        HashMap<String, ArrayList<Hashtable<String, String>>> attempts = getAllTestsAndOfflineAttemptStates();
+        attempts.remove(quizId);
         MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_TOPICS_OFFLINE_ATTEMPT_STATES, new Gson().toJson(attempts)).apply();
 
         //Delete Paused Times
+        Set<String> savedQuizTimes = MyApplication.getAppInstance()
+                .getSharedPreferences()
+                .getStringSet(MAP_QUIZ_TIME, new HashSet<String>());
+        for (String quizTime : savedQuizTimes) {
+            if (TextUtils.equals(quizTime.split(DELIMITER)[0], quizId)) {
+                savedQuizTimes.remove(quizTime);
+            }
+        }
         MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .edit().putStringSet(MAP_QUIZ_TIME, new HashSet<String>()).apply();
-
-        //Delete Marked Questions
-        Hashtable<String, Set<String>> markedQues = new Hashtable<>();
-        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_MARKED_QUESTIONS, new Gson().toJson(markedQues)).apply();
+                .edit().putStringSet(MAP_QUIZ_TIME, savedQuizTimes).apply();
 
     }
 
-    public static void saveOfflineAttemptStates(String quizId, String topicId, ArrayList<Hashtable<String, String>> offlineAttempts) {
+    public static void saveOfflineAttemptStates(String quizId, ArrayList<Hashtable<String, String>> offlineAttempts) {
         HashMap<String, ArrayList<Hashtable<String, String>>> attemptStates = getAllTestsAndOfflineAttemptStates();
-        attemptStates.put(quizId + DELIMITER + topicId, offlineAttempts);
+        attemptStates.put(quizId, offlineAttempts);
         MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_TOPICS_OFFLINE_ATTEMPT_STATES, new Gson().toJson(attemptStates)).apply();
     }
 
@@ -139,24 +143,13 @@ public class AppPreferenceManager {
                 .getString(SAVED_TOPICS_OFFLINE_ATTEMPT_STATES, new Gson().toJson(new HashMap<String, ArrayList<Hashtable<String, String>>>())), type);
     }
 
-    public static ArrayList<Hashtable<String, String>> getOfflineAttemptState(String quizId, String topicId) {
+    public static ArrayList<Hashtable<String, String>> getOfflineAttemptState(String quizId) {
         HashMap<String, ArrayList<Hashtable<String, String>>> attemptStates = getAllTestsAndOfflineAttemptStates();
         if (attemptStates != null)
-            return attemptStates.get(quizId + DELIMITER + topicId);
+            return attemptStates.get(quizId);
         return null;
     }
 
-
-    public static void addMarkedQuestions(String quizId, String topicId, ArrayList<String> questions) {
-        Hashtable<String, Set<String>> markedQues = getAllMarkedQuestions();
-        Set<String> topicMarkedQues = markedQues.get(quizId + DELIMITER + topicId);
-        if (topicMarkedQues != null && !topicMarkedQues.isEmpty()) {
-            topicMarkedQues.clear();
-        }
-        topicMarkedQues = (Set<String>) questions;
-        markedQues.put(quizId + DELIMITER + topicId, topicMarkedQues);
-        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_MARKED_QUESTIONS, new Gson().toJson(markedQues)).apply();
-    }
 
     //    <quiz_id,<topic_id,question_id>>
     public static Hashtable<String, Set<String>> getAllMarkedQuestions() {
@@ -168,14 +161,5 @@ public class AppPreferenceManager {
         return markedQues;
     }
 
-    //    <quiz_id,<topic_id,question_id>>
-    public static ArrayList<String> getMarkedQuestions(String quizId, String topicId) {
-        java.lang.reflect.Type type = new TypeToken<Hashtable<String, Set<String>>>() {
-        }.getType();
-        Hashtable<String, Set<String>> markedQues = new Gson().fromJson(MyApplication.getAppInstance()
-                .getSharedPreferences()
-                .getString(SAVED_MARKED_QUESTIONS, new Gson().toJson(new Hashtable<String, Set<String>>())), type);
-        return (ArrayList<String>) markedQues.get(quizId + DELIMITER + topicId);
-    }
 
 }

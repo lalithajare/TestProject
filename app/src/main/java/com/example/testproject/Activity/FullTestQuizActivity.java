@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -339,7 +338,8 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                     }
 
                     if (quesList != null && !quesList.isEmpty()) {
-                        saveTestState();
+                        saveTopicState();
+                        saveOfflineAttempts();
                     }
 
                     finish();

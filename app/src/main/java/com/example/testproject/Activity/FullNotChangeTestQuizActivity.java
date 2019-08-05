@@ -6,10 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,7 +26,6 @@ import com.example.testproject.Utils.InternetCheck;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Hashtable;
-import java.util.Objects;
 
 public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
 
@@ -316,7 +313,8 @@ public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
                     }
 
                     if (quesList != null && !quesList.isEmpty()) {
-                        saveTestState();
+                        saveTopicState();
+                        saveOfflineAttempts();
                     }
 
                     finish();
