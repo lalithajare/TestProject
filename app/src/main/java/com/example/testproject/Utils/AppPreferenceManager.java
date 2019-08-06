@@ -2,6 +2,7 @@ package com.example.testproject.Utils;
 
 import android.text.TextUtils;
 
+import com.example.testproject.Model.QuizAllQuestionTopicWiseResponseSchema;
 import com.example.testproject.common.MyApplication;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -18,7 +19,7 @@ public class AppPreferenceManager {
 
     private static final String SAVED_TOPIC_STATES = "quizes_ids_and_times_page_index";
     private static final String SAVED_TOPICS_OFFLINE_ATTEMPT_STATES = "quizes_offline_attempts";
-    private static final String SAVED_MARKED_QUESTIONS = "marked_questions";
+    private static final String SAVED_QUIZ_QUESTIONS = "quiz_questions";
     private static final String MAP_QUIZ_TIME = "quiz_time";
 
     public static void addTopicState(String quizId, String topicId, String quizPauseTime, String pagerIndex) {
@@ -150,16 +151,24 @@ public class AppPreferenceManager {
         return null;
     }
 
-
-    //    <quiz_id,<topic_id,question_id>>
-    public static Hashtable<String, Set<String>> getAllMarkedQuestions() {
-        java.lang.reflect.Type type = new TypeToken<Hashtable<String, Set<String>>>() {
+    //quiz_id, QuizAllQuestionTopicWiseResponseSchema
+    public static HashMap<String, QuizAllQuestionTopicWiseResponseSchema> getAllSavedQuizesQuestions() {
+        java.lang.reflect.Type type = new TypeToken<HashMap<String, QuizAllQuestionTopicWiseResponseSchema>>() {
         }.getType();
-        Hashtable<String, Set<String>> markedQues = new Gson().fromJson(MyApplication.getAppInstance()
+        return new Gson().fromJson(MyApplication.getAppInstance()
                 .getSharedPreferences()
-                .getString(SAVED_MARKED_QUESTIONS, new Gson().toJson(new Hashtable<String, Set<String>>())), type);
-        return markedQues;
+                .getString(SAVED_QUIZ_QUESTIONS, new Gson().toJson(new HashMap<String, QuizAllQuestionTopicWiseResponseSchema>())), type);
     }
 
+    public static QuizAllQuestionTopicWiseResponseSchema getQuizQuestions(String quizId) {
+        return getAllSavedQuizesQuestions().get(quizId);
+    }
+
+    public static void saveQuizQuestions(String quizId, QuizAllQuestionTopicWiseResponseSchema quizAllQuestionTopicWiseResponseSchema) {
+        HashMap<String, QuizAllQuestionTopicWiseResponseSchema> savedQuizes = getAllSavedQuizesQuestions();
+        savedQuizes.remove(quizId);
+        savedQuizes.put(quizId, quizAllQuestionTopicWiseResponseSchema);
+        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_QUIZ_QUESTIONS, new Gson().toJson(savedQuizes)).apply();
+    }
 
 }

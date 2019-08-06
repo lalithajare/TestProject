@@ -183,10 +183,13 @@ public class FullTestQuizActivity extends ParentQuizActivity {
             }
         });
 
-        if (InternetCheck.isInternetOn(FullTestQuizActivity.this)) {
-            callTopicsAPI();
+        if (mQuestionsDispatcher == null) {
+            //Load all the questions for Quiz section-wise
+            //Then show only the questions related to Topic currently selected
+            getQuizData();
         } else {
-            Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
+            //Show only the questions related to Topic currently selected
+            bindQuestionsToTopic();
         }
 
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -340,6 +343,7 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                     if (quesList != null && !quesList.isEmpty()) {
                         saveTopicState();
                         saveOfflineAttempts();
+                        saveQuizQuestions();
                     }
 
                     finish();

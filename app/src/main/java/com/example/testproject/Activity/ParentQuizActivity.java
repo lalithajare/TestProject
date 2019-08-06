@@ -50,6 +50,7 @@ import com.example.testproject.Model.AnswerSetGet;
 import com.example.testproject.Model.FullQuestionSetGet;
 import com.example.testproject.Model.FullTopicTest;
 import com.example.testproject.Model.QuestionDetailsResponseSchema;
+import com.example.testproject.Model.QuizAllQuestionTopicWiseResponseSchema;
 import com.example.testproject.Model.TopicResponseSchema;
 import com.example.testproject.R;
 import com.example.testproject.URLs.UrlsAvision;
@@ -240,57 +241,19 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         });
     }
 
-    protected void callTopicsAPI() {
-        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ_TOPIC, new Response.Listener<String>() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-            @Override
-            public void onResponse(String response) {
-                try {
-                    parseTopicResponse(response);
-
-                    setTopicsUI();
-
-                    if (wasPaused) {
-                        resumeTime();
-                        getSavedOfflineAttempts();
-                    } else {
-                        startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
-                    }
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        }) {
-            @Override
-            public Priority getPriority() {
-                return Priority.IMMEDIATE;
-            }
-
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new Hashtable<>();
-                params.put("quiz_id", getIntent().getStringExtra("quiz_id"));
-                params.put("student_id", "6");
-                params.put("start_time", currentTime);
-                params.put("remaining_time", "0");
-                Log.d("FullLength", "getParams: " + params);
-                return params;
-            }
-        };
-        request.setRetryPolicy(new DefaultRetryPolicy(30000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        AppWebService.getInstance(getApplicationContext()).addToRequestQueue(request);
-    }
-
     private void setTopicsUI() {
+
+        QuizAllQuestionTopicWiseResponseSchema quizAllQuestionTopicWiseResponseSchema = mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema();
+        for (TopicResponseSchema topicResponseSchema : quizAllQuestionTopicWiseResponseSchema.getTopicResonseSchema()) {
+            FullTopicTest fullTopicTest = new FullTopicTest(topicResponseSchema.getSectionId()
+                    , topicResponseSchema.getSectionName()
+                    , topicResponseSchema.getDuration()
+                    , String.valueOf(topicResponseSchema.getQuestionArrayList().size())
+                    , String.valueOf(topicResponseSchema.getQuestionArrayList().size()));
+            topicList.add(fullTopicTest);
+            strings.add(fullTopicTest.full_length_type_name);
+        }
+
         adapter = new ArrayAdapter(ParentQuizActivity.this, R.layout.free_spinner_layout, strings);
         spinner_topic.setAdapter(adapter);
         spinner_topic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -307,16 +270,8 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                     submitButton.setVisibility(View.GONE);
                     submitButton.setText("Save & Next");
                 }
-                rl_ques.setVisibility(View.GONE);
-
-                if (mQuestionsDispatcher == null) {
-                    //Load all the questions for Quiz section-wise
-                    //Then show only the questions related to Topic currently selected
-                    callFullChangeTestQuesAPI();
-                } else {
-                    //Show only the questions related to Topic currently selected
-                    bindQuestionsToTopic();
-                }
+//                rl_ques.setVisibility(View.GONE);
+                bindQuestionsToTopic();
             }
 
             @Override
@@ -326,35 +281,35 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         });
     }
 
-    private void parseTopicResponse(String response) throws JSONException {
-        JSONObject object = new JSONObject(response);
-        Log.d("FullResponse", "onResponse: " + response);
-        String status = object.getString("status_code");
-        String message = object.getString("message");
-        if (status.equalsIgnoreCase("200")) {
-            JSONObject msgObject = object.getJSONObject("message");
-            Const.STUDENT_TEST_ID = msgObject.getString("student_test_id");
-            JSONArray jsonArray = msgObject.getJSONArray("quiz_dtls");
-            topicList.clear();
-            strings.clear();
-            FullTopicTest fullTopicTest;
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject object1 = jsonArray.getJSONObject(i);
-                fullTopicTest = new FullTopicTest(object1.getString("type_id"), object1.getString("type_name"),
-                        object1.getString("duration"), object1.getString("total_question"),
-                        object1.getString("count"));
+//    private void parseTopicResponse(String response) throws JSONException {
+//        JSONObject object = new JSONObject(response);
+//        Log.d("FullResponse", "onResponse: " + response);
+//        String status = object.getString("status_code");
+//        String message = object.getString("message");
+//        if (status.equalsIgnoreCase("200")) {
+//            JSONObject msgObject = object.getJSONObject("message");
+//            Const.STUDENT_TEST_ID = msgObject.getString("student_test_id");
+//            JSONArray jsonArray = msgObject.getJSONArray("quiz_dtls");
+//            topicList.clear();
+//            strings.clear();
+//            FullTopicTest fullTopicTest;
+//            for (int i = 0; i < jsonArray.length(); i++) {
+//                JSONObject object1 = jsonArray.getJSONObject(i);
+//                fullTopicTest = new FullTopicTest(object1.getString("type_id"), object1.getString("type_name"),
+//                        object1.getString("duration"), object1.getString("total_question"),
+//                        object1.getString("count"));
+//
+//                topicList.add(fullTopicTest);
+//                strings.add(topicList.get(i).full_length_type_name);
+//            }
+//        } else {
+//            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+//            spinner_topic.setVisibility(View.GONE);
+//
+//        }
+//    }
 
-                topicList.add(fullTopicTest);
-                strings.add(topicList.get(i).full_length_type_name);
-            }
-        } else {
-            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-            spinner_topic.setVisibility(View.GONE);
-
-        }
-    }
-
-    protected void callFullChangeTestQuesAPI() {
+    protected void getQuizData() {
         noDataImage.setVisibility(View.GONE);
         tryAgainText.setVisibility(View.GONE);
         markButton.setVisibility(View.GONE);
@@ -364,11 +319,20 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.setCancelable(false);
         dialog.show();
-        mQuestionsDispatcher = new QuizQuestionsDispatcher(quiz_id, new QuizQuestionsDispatcher.QuestionsLoadedListener() {
+        mQuestionsDispatcher = new QuizQuestionsDispatcher(quiz_id, wasPaused, new QuizQuestionsDispatcher.QuestionsLoadedListener() {
             @Override
             public void OnQuestionsLoaded() {
                 dialog.dismiss();
-                bindQuestionsToTopic();
+                topicList.clear();
+                strings.clear();
+                if (wasPaused) {
+                    resumeTime();
+                    getSavedOfflineAttempts();
+                } else {
+                    startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
+                }
+//                bindQuestionsToTopic();
+                setTopicsUI();
             }
 
             @Override
@@ -717,6 +681,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        progressDialog.hide();
                         try {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status_code");
@@ -735,8 +700,6 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                                 AppPreferenceManager.deleteQuizState(quiz_id);
                                 finish();
                             }
-                            progressDialog.hide();
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -770,5 +733,10 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
 
     protected void saveOfflineAttempts() {
         AppPreferenceManager.saveOfflineAttemptStates(quiz_id, attemptedOfflineQuestions);
+    }
+
+    protected void saveQuizQuestions() {
+        if (mQuestionsDispatcher != null && mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema() != null)
+            AppPreferenceManager.saveQuizQuestions(quiz_id, mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema());
     }
 }

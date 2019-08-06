@@ -157,30 +157,10 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
                 freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")) {
             Const.STUDENT_TEST_ID = freeTests.get(position).getStudent_test_taken_id();
             if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") && !wasPaused) {
-//                Intent intent = new Intent(context, ResultPannelActivity.class);
-//                Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
-//                Const.END_TIME_STATUS = "0";
-//                context.startActivity(intent);
-
-                //*************************************************REMOVE THIS *******************************************************************************************
-
-                Intent intent = new Intent(context, TestInstructionActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("quiz_id", freeTests.get(position).getTest_quiz_id());
-                intent.putExtra("was_paused", wasPaused);
-                intent.putExtra("quiz_name", freeTests.get(position).getTest_quiz_name());
-                intent.putExtra("total_time", freeTests.get(position).getTest_time());
-                intent.putExtra("remain_time", freeTests.get(position).getRemaining_time());
-                intent.putExtra("changable", freeTests.get(position).getTest_changable());
-                intent.putExtra("total_question", freeTests.get(position).getTest_no_of_qs());
-                intent.putExtra("direction", freeTests.get(position).getTest_direction_status());
-                intent.putExtra("total_marks", freeTests.get(position).getTest_total_marks());
+                Intent intent = new Intent(context, ResultPannelActivity.class);
                 Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
-                Const.END_TIME_STATUS = "1";
+                Const.END_TIME_STATUS = "0";
                 context.startActivity(intent);
-
-                //*************************************************REMOVE THIS *******************************************************************************************
-
             } else {
                 Intent intent = new Intent(context, TestInstructionActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -202,30 +182,10 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
         } else if (freeTests.get(position).getTest_status().equalsIgnoreCase("1")) {
             Const.STUDENT_TEST_ID = freeTests.get(position).getStudent_test_taken_id();
             if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") && !wasPaused) {
-//                Intent intent = new Intent(context, ResultPannelActivity.class);
-//                Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
-//                Const.END_TIME_STATUS = "0";
-//                context.startActivity(intent);
-
-                //*************************************************REMOVE THIS *******************************************************************************************
-
-                Intent intent = new Intent(context, TestInstructionActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("quiz_id", freeTests.get(position).getTest_quiz_id());
-                intent.putExtra("was_paused", wasPaused);
-                intent.putExtra("quiz_name", freeTests.get(position).getTest_quiz_name());
-                intent.putExtra("total_time", freeTests.get(position).getTest_time());
-                intent.putExtra("remain_time", freeTests.get(position).getRemaining_time());
-                intent.putExtra("changable", freeTests.get(position).getTest_changable());
-                intent.putExtra("total_question", freeTests.get(position).getTest_no_of_qs());
-                intent.putExtra("direction", freeTests.get(position).getTest_direction_status());
-                intent.putExtra("total_marks", freeTests.get(position).getTest_total_marks());
+                Intent intent = new Intent(context, ResultPannelActivity.class);
                 Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
-                Const.END_TIME_STATUS = "1";
+                Const.END_TIME_STATUS = "0";
                 context.startActivity(intent);
-
-                //*************************************************REMOVE THIS *******************************************************************************************
-
 
             } else {
                 Intent intent = new Intent(context, TestInstructionActivity.class);
@@ -247,32 +207,10 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
         } else if (freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")) {
             Const.STUDENT_TEST_ID = freeTests.get(position).getStudent_test_taken_id();
             if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") && !wasPaused) {
-
-//                Intent intent = new Intent(context, ResultPannelActivity.class);
-//                Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
-//                Const.END_TIME_STATUS = "0";
-//                context.startActivity(intent);
-
-                //*************************************************REMOVE THIS *******************************************************************************************
-
-                Intent intent = new Intent(context, TestInstructionActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("quiz_id", freeTests.get(position).getTest_quiz_id());
-                intent.putExtra("was_paused", wasPaused);
-                intent.putExtra("quiz_name", freeTests.get(position).getTest_quiz_name());
-                intent.putExtra("total_time", freeTests.get(position).getTest_time());
-                intent.putExtra("remain_time", freeTests.get(position).getRemaining_time());
-                intent.putExtra("changable", freeTests.get(position).getTest_changable());
-                intent.putExtra("total_question", freeTests.get(position).getTest_no_of_qs());
-                intent.putExtra("direction", freeTests.get(position).getTest_direction_status());
-                intent.putExtra("total_marks", freeTests.get(position).getTest_total_marks());
+                Intent intent = new Intent(context, ResultPannelActivity.class);
                 Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
-                Const.END_TIME_STATUS = "1";
+                Const.END_TIME_STATUS = "0";
                 context.startActivity(intent);
-
-                //*************************************************REMOVE THIS *******************************************************************************************
-
-
 
             } else {
                 Intent intent = new Intent(context, TestInstructionActivity.class);
