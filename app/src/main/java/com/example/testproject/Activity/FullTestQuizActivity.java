@@ -18,16 +18,18 @@ import android.widget.Toast;
 
 import com.example.testproject.Adapter.BigGridReviewAdapter;
 import com.example.testproject.Adapter.BigRecycleReviewAdapter;
+import com.example.testproject.Model.FullQuestionSetGet;
+import com.example.testproject.Model.QuestionDetailsResponseSchema;
 import com.example.testproject.R;
 import com.example.testproject.Utils.AppPreferenceManager;
 import com.example.testproject.Utils.Const;
 import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.InternetCheck;
+import com.example.testproject.Utils.QuizOfflineStateHandler;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Hashtable;
-import java.util.Map;
 
 
 public class FullTestQuizActivity extends ParentQuizActivity {
@@ -59,40 +61,11 @@ public class FullTestQuizActivity extends ParentQuizActivity {
         markButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (markButton.getText().toString().equalsIgnoreCase("Mark for Review")) {
-                    if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
-                        Const.hashMapSelectMarkReview.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
-                        Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                    } else {
-                        Const.hashMapMarkSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
-                        Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
+                QuestionDetailsResponseSchema questionDetailsResponseSchema = quesList.get(viewPager.getCurrentItem());
+                questionDetailsResponseSchema.setMarked(true);
+                markButton.setVisibility(View.GONE);
 
-                    }
-                    markButton.setText("Mark for\n Review");
-                    rl_view_marked.setVisibility(View.VISIBLE);
-                } else {
-                    if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
-                        Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapSelectMarkReview.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
-                        markButton.setText("Mark for Review");
-                        rl_view_marked.setVisibility(View.GONE);
-                    } else {
-                        Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapSelectMarkReview.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        markButton.setText("Mark for Review");
-                        rl_view_marked.setVisibility(View.GONE);
-                    }
-
-                }
-
-                for (Map.Entry<String, Boolean> entry : Const.hashMapSelected.entrySet()) {
-                    editor.putBoolean(entry.getKey(), true);
-                }
-                editor.commit();
-
+                saveCurrentQuizState(true);
             }
         });
         switch_btn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -183,7 +156,7 @@ public class FullTestQuizActivity extends ParentQuizActivity {
             }
         });
 
-        if (mQuestionsDispatcher == null) {
+        if (mQuizOfflineStateHandler == null) {
             //Load all the questions for Quiz section-wise
             //Then show only the questions related to Topic currently selected
             getQuizData();
@@ -195,39 +168,8 @@ public class FullTestQuizActivity extends ParentQuizActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (customCountDownTimer.isRunning()) {
-                    if (markButton.getText().toString().equalsIgnoreCase("Mark for\n Review")
-                            && Const.answerCheckHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
-                        Const.hashMapSelectMarkReview.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
-                        Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-
-                    } else {
-                        Const.hashMapSelectMarkReview.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-                        Const.hashMapSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
-                    }
-
-
-                    //Save answer in Local storage
-                    AppPreferenceManager.addAnswer(quiz_id, Const.TYPE_ID, Const.CHOOSE_QUESTION_ID + AppPreferenceManager.DELIMITER + Const.ANSWER_ID);
-
-                    if (InternetCheck.isInternetOn(FullTestQuizActivity.this)) {
-                        callSubmitAnswerAPI();
-                    } else {
-//                    Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
-                        Hashtable<String, String> params = new Hashtable<>();
-                        params.put("test_id", Const.STUDENT_TEST_ID);
-                        params.put("qus_id", Const.CHOOSE_QUESTION_ID);
-                        params.put("answers_id", Const.ANSWER_ID);
-                        params.put("question_status", "1");
-                        attemptedOfflineQuestions.add(params);
-                        nextQuestion();
-                    }
-                    for (Map.Entry<String, Boolean> entry : Const.hashMapSelected.entrySet()) {
-                        editor.putBoolean(entry.getKey(), true);
-                    }
-                    editor.commit();
+                    saveCurrentQuizState(false);
                 } else {
                     Toast.makeText(getApplicationContext(), "The Test is Paused, please resume it.", Toast.LENGTH_LONG).show();
                 }
@@ -345,12 +287,18 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                     }
 
                     if (quesList != null && !quesList.isEmpty()) {
+                        saveCurrentTopic();
                         saveTopicState();
                         saveOfflineAttempts();
-                        saveQuizQuestions();
+                        saveQuiz(new QuizOfflineStateHandler.QuizSaveListener() {
+                            @Override
+                            public void onQuizSaved() {
+                                finish();
+                            }
+                        });
+                    } else {
+                        finish();
                     }
-
-                    finish();
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -362,4 +310,5 @@ public class FullTestQuizActivity extends ParentQuizActivity {
             builder.show();
         }
     }
+
 }

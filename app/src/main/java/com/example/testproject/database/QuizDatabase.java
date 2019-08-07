@@ -5,7 +5,11 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
-@Database(entities = {Question.class}, version = 1)
+import com.example.testproject.Model.AnswerDetailsSchema;
+import com.example.testproject.Model.QuestionDetailsResponseSchema;
+import com.example.testproject.Model.TopicResponseSchema;
+
+@Database(entities = {QuestionDetailsResponseSchema.class, AnswerDetailsSchema.class, TopicResponseSchema.class}, version = 1)
 public abstract class QuizDatabase extends RoomDatabase {
     private static QuizDatabase INSTANCE;
 
@@ -21,5 +25,9 @@ public abstract class QuizDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    public abstract QuestionDAO getQuestioNDAO();
+    public abstract QuestionDAO getQuestionDAO();
+
+    public abstract AnswerDAO getOptionDAO();
+
+    public abstract TopicDAO getTopicDAO();
 }

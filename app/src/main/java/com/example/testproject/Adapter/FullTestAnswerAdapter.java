@@ -14,35 +14,29 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.testproject.Model.AnswerSetGet;
+import com.example.testproject.Model.AnswerDetailsSchema;
 import com.example.testproject.R;
-import com.example.testproject.Utils.Const;
 
 import java.util.List;
 
 public class FullTestAnswerAdapter extends RecyclerView.Adapter<FullTestAnswerAdapter.ansViewHolder> {
     private Context context;
-    private List<AnswerSetGet> ansList;
+    private List<AnswerDetailsSchema> ansList;
 
-    private int selectedPosition = -1;
     private Button btn_save_next, btn_clear;
     private String question, questionId;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
 
 
-    public FullTestAnswerAdapter(Context context, List<AnswerSetGet> ansList
-            , String question, String questionId, Button btn_save_next
-            , Integer selectedPosition) {
+    public FullTestAnswerAdapter(Context context, List<AnswerDetailsSchema> ansList
+            , String question, String questionId, Button btn_save_next) {
         this.context = context;
         this.ansList = ansList;
         this.btn_save_next = btn_save_next;
         //this.btn_clear = btn_clear;
         this.question = question;
         this.questionId = questionId;
-        if (selectedPosition != -1) {
-            this.selectedPosition = selectedPosition;
-        }
     }
 
     @NonNull
@@ -60,58 +54,45 @@ public class FullTestAnswerAdapter extends RecyclerView.Adapter<FullTestAnswerAd
         //AnswerSetGet answerSetGet = ansList.get(position);
         int no = position + 1;
         viewHolder.tv_ans_no.setText("(" + (char) (no + 'A' - 1) + ")");
-        viewHolder.ans_body.loadDataWithBaseURL(null, ansList.get(position).getGoal_answer(), "text/html", "utf-8", null);
+        viewHolder.ans_body.loadDataWithBaseURL(null, ansList.get(position).getAnswer(), "text/html", "utf-8", null);
         pref = context.getSharedPreferences("HashValue", Context.MODE_PRIVATE);
         editor = pref.edit();
         editor.apply();
 
-        final int finalPosition = position;
         viewHolder.card_ans.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectedPosition = position;
-                Const.CHOOSE_QUESTION_ID = questionId;
-                Const.ANSWER_ID = ansList.get(selectedPosition).getGoal_answers_id();
-                btn_save_next.setVisibility(View.VISIBLE);
-                Const.answerStoreHash.put(questionId, ansList.get(selectedPosition).getGoal_answer());
-                Const.answerCheckHash.put(questionId, String.valueOf(selectedPosition));
-                Const.answerQuestionStoreHash.put(question, ansList.get(selectedPosition).getGoal_answer());
-                notifyDataSetChanged();
+                selectOption(position);
             }
         });
         viewHolder.rl_ans.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectedPosition = position;
-                Const.CHOOSE_QUESTION_ID = questionId;
-                Const.ANSWER_ID = ansList.get(selectedPosition).getGoal_answers_id();
-                btn_save_next.setVisibility(View.VISIBLE);
-                Const.answerStoreHash.put(questionId, ansList.get(selectedPosition).getGoal_answer());
-                Const.answerCheckHash.put(questionId, String.valueOf(selectedPosition));
-                Const.answerQuestionStoreHash.put(question, ansList.get(selectedPosition).getGoal_answer());
-                notifyDataSetChanged();
+                selectOption(position);
             }
         });
         viewHolder.ans_body.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectedPosition = position;
-                Const.CHOOSE_QUESTION_ID = questionId;
-                Const.ANSWER_ID = ansList.get(selectedPosition).getGoal_answers_id();
-                btn_save_next.setVisibility(View.VISIBLE);
-                Const.answerStoreHash.put(questionId, ansList.get(selectedPosition).getGoal_answer());
-                Const.answerCheckHash.put(questionId, String.valueOf(selectedPosition));
-                Const.answerQuestionStoreHash.put(question, ansList.get(selectedPosition).getGoal_answer());
-                notifyDataSetChanged();
+                selectOption(position);
             }
         });
-        if (selectedPosition == position) {
+        if (ansList.get(position).isSelected()) {
             viewHolder.rl_ans.setBackground(context.getResources().getDrawable(R.drawable.a));
             viewHolder.ans_body.setBackgroundColor(Color.parseColor("#E2F0FF"));
         } else {
             viewHolder.rl_ans.setBackground(context.getResources().getDrawable(R.drawable.b));
             viewHolder.ans_body.setBackgroundColor(Color.parseColor("#FFFFFF"));
         }
+    }
+
+    private void selectOption(int position) {
+        for (AnswerDetailsSchema answerDetailsSchema : ansList) {
+            answerDetailsSchema.setSelected(false);
+        }
+        ansList.get(position).setSelected(true);
+        btn_save_next.setVisibility(View.VISIBLE);
+        notifyDataSetChanged();
     }
 
     @Override

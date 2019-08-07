@@ -35,12 +35,4 @@ public class Const {
     public static String CATEGORY_ID = "";
     public static ArrayList<TestPattern> patternArrayList;
 
-    public static HashMap<String, String> answerCheckHash = new HashMap<>();
-    public static HashMap<String, String> answerStoreHash = new HashMap<>();
-    public static HashMap<String, String> answerQuestionStoreHash = new HashMap<>();
-
-    public static HashMap<String, List<FreeTestAnswer>> questionAnswerStoreHash = new HashMap<>();
-    public static HashMap<String, Boolean> hashMapSelected = new HashMap<>();
-    public static HashMap<String, Boolean> hashMapMarkSelected = new HashMap<>();
-    public static HashMap<String, Boolean> hashMapSelectMarkReview = new HashMap<>();
 }

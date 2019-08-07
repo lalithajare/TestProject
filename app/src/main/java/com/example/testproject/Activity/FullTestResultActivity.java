@@ -160,9 +160,6 @@ public class FullTestResultActivity extends AppCompatActivity {
                             linearLayout2.setVisibility(View.VISIBLE);
 
                             progressBar.setVisibility(View.GONE);
-                            Const.answerCheckHash.clear();
-                            Const.answerStoreHash.clear();
-                            Const.questionAnswerStoreHash.clear();
 
                         } else {
                             pieChart.setVisibility(View.GONE);

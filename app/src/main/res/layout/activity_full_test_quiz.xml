@@ -212,7 +212,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="Mark for review"
+                        android:text="Marked for review"
                         android:textColor="@color/white"
                         android:textSize="16sp"
                         android:textStyle="bold" />

@@ -45,9 +45,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.example.testproject.Adapter.BigGridReviewAdapter;
 import com.example.testproject.Adapter.BigRecycleReviewAdapter;
 import com.example.testproject.Adapter.FullQuizTestPageAdapter;
-import com.example.testproject.Model.AnswerDetailsSchema;
-import com.example.testproject.Model.AnswerSetGet;
-import com.example.testproject.Model.FullQuestionSetGet;
 import com.example.testproject.Model.FullTopicTest;
 import com.example.testproject.Model.QuestionDetailsResponseSchema;
 import com.example.testproject.Model.QuizAllQuestionTopicWiseResponseSchema;
@@ -59,18 +56,17 @@ import com.example.testproject.Utils.AppWebService;
 import com.example.testproject.Utils.Const;
 import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.CustomViewPager;
-import com.example.testproject.Utils.QuizQuestionsDispatcher;
+import com.example.testproject.Utils.InternetCheck;
+import com.example.testproject.Utils.QuizOfflineStateHandler;
 import com.example.testproject.Utils.UtilFunctions;
 import com.example.testproject.common.ApiCallManager;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -86,9 +82,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
     protected String currentTime;
 
     protected AppCompatActivity mContext;
-    protected ArrayList<FullQuestionSetGet> quesList;
-    protected ArrayList<AnswerSetGet> ansList;
-    protected HashMap<String, ArrayList<AnswerSetGet>> listHashMap;
+    protected ArrayList<QuestionDetailsResponseSchema> quesList;
     protected RelativeLayout rl_top;
     protected ImageButton iv_review, iv_close;
     protected BigGridReviewAdapter gridReviewAdapter;
@@ -124,7 +118,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
     protected Button test_finish_button;
     protected String TAG = ParentQuizActivity.class.getSimpleName();
 
-    protected QuizQuestionsDispatcher mQuestionsDispatcher;
+    protected QuizOfflineStateHandler mQuizOfflineStateHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,14 +152,11 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         finishButton = findViewById(R.id.test_finish_button);
         submitButton = findViewById(R.id.submit_ans);
         markButton = findViewById(R.id.pre_ans);
-        // clearButton=findViewById(R.id.clear_ans);
         viewPager = findViewById(R.id.viewpager);
         noDataImage = findViewById(R.id.no_data_image);
         tryAgainText = findViewById(R.id.try_again_text);
         markButton.setVisibility(View.GONE);
-        // clearButton.setVisibility(View.GONE);
         submitButton.setVisibility(View.GONE);
-//        iv_play = findViewById(R.id.iv_play);
         question_gridView = findViewById(R.id.question_gridView);
         drawerLayout = findViewById(R.id.drawer_layout);
         drawerView = findViewById(R.id.drawer);
@@ -242,7 +233,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
 
     private void setTopicsUI() {
 
-        QuizAllQuestionTopicWiseResponseSchema quizAllQuestionTopicWiseResponseSchema = mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema();
+        QuizAllQuestionTopicWiseResponseSchema quizAllQuestionTopicWiseResponseSchema = mQuizOfflineStateHandler.getmQuizAllQuestionTopicWiseResponseSchema();
         for (TopicResponseSchema topicResponseSchema : quizAllQuestionTopicWiseResponseSchema.getTopicResonseSchema()) {
             FullTopicTest fullTopicTest = new FullTopicTest(topicResponseSchema.getSectionId()
                     , topicResponseSchema.getSectionName()
@@ -265,13 +256,12 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                 Const.TYPE_ID = topicList.get(position).full_length_type_id;
                 Const.TYPE_NAME = topicList.get(position).full_length_type_name;
 
-//                mQuestionsDispatcher.initializeChosenAnswers(Const.TYPE_ID);
 
                 if (submitButton.getVisibility() == View.VISIBLE) {
                     submitButton.setVisibility(View.GONE);
                     submitButton.setText("Save & Next");
                 }
-//                rl_ques.setVisibility(View.GONE);
+
                 bindQuestionsToTopic();
             }
 
@@ -292,7 +282,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.setCancelable(false);
         dialog.show();
-        mQuestionsDispatcher = new QuizQuestionsDispatcher(quiz_id, wasPaused, new QuizQuestionsDispatcher.QuestionsLoadedListener() {
+        mQuizOfflineStateHandler = new QuizOfflineStateHandler(quiz_id, wasPaused, new QuizOfflineStateHandler.QuestionsLoadedListener() {
             @Override
             public void OnQuestionsLoaded() {
                 dialog.dismiss();
@@ -325,62 +315,25 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         rl_ques.setVisibility(View.VISIBLE);
         markButton.setVisibility(View.VISIBLE);
         rl_view_marked.setVisibility(View.GONE);
-        markButton.setText("Mark for Review");
 
         quesList = new ArrayList<>();
-        listHashMap = new HashMap<>();
 
-        ArrayList<TopicResponseSchema> topicResponseSchemas = mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema().getTopicResonseSchema();
-        int noOfQuestionsInTopic = 0;
+        ArrayList<TopicResponseSchema> topicResponseSchemas = mQuizOfflineStateHandler.getmQuizAllQuestionTopicWiseResponseSchema().getTopicResonseSchema();
         for (TopicResponseSchema topicResponseSchema : topicResponseSchemas) {
             if (TextUtils.equals(topicResponseSchema.getSectionId(), Const.TYPE_ID)) {
-                for (QuestionDetailsResponseSchema questionDetailsResponseSchema : topicResponseSchema.getQuestionArrayList()) {
-
-                    //Convert API model to Locally used model :- Question List
-                    FullQuestionSetGet fullQuestionSetGet = new FullQuestionSetGet();
-                    fullQuestionSetGet.setTest_question_id(questionDetailsResponseSchema.getQuestionId());
-                    fullQuestionSetGet.setTest_question(questionDetailsResponseSchema.getQuestion());
-                    fullQuestionSetGet.setTest_directions(questionDetailsResponseSchema.getDirections());
-
-                    //Convert API model to Locally used model :- Answer List
-                    ansList = new ArrayList<>();
-                    for (AnswerDetailsSchema answerDetailsSchema : questionDetailsResponseSchema.getAnswerDetails()) {
-                        AnswerSetGet answerSetGet = new AnswerSetGet();
-                        answerSetGet.setGoal_answers_id(answerDetailsSchema.getAnswerId());
-                        answerSetGet.setGoal_answer(answerDetailsSchema.getAnswer());
-                        ansList.add(answerSetGet);
-                    }
-                    listHashMap.put(fullQuestionSetGet.getTest_question_id(), ansList);
-                    quesList.add(fullQuestionSetGet);
-                    noOfQuestionsInTopic++;
-                }
-
+                quesList.addAll(topicResponseSchema.getQuestionArrayList());
                 break;
             }
         }
-        Const.TOTAL_QUIZ_QUES = String.valueOf(noOfQuestionsInTopic);
+        Const.TOTAL_QUIZ_QUES = String.valueOf(quesList.size());
         setQuizPagerUI();
     }
 
     protected void setQuizPagerUI() {
-        FullQuizTestPageAdapter quizTestPageAdapter = new FullQuizTestPageAdapter(getApplicationContext(), quesList, listHashMap, submitButton/*,clearButton*/);
+        FullQuizTestPageAdapter quizTestPageAdapter = new FullQuizTestPageAdapter(getApplicationContext(), quesList, submitButton/*,clearButton*/);
         viewPager.setAdapter(quizTestPageAdapter);
-        totalQuestion.setText(1 + "/" + listHashMap.size());
-        if (Const.hashMapMarkSelected.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
-            markButton.setText("Mark for\n Review");
-            rl_view_marked.setVisibility(View.VISIBLE);
-        } else if (Const.hashMapSelectMarkReview.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
-            markButton.setText("Mark for\n Review");
-            rl_view_marked.setVisibility(View.VISIBLE);
-        }/*else if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
-                            clearButton.setText("Clear\n Selection");
-                            clearButton.setTextColor(Color.parseColor("#FFFFFF"));
-                        }*/ else {
-            markButton.setText("Mark for Review");
-            rl_view_marked.setVisibility(View.GONE);
-            // clearButton.setText("Clear Selection");
-            //  clearButton.setTextColor(Color.parseColor("#B9BBBB"));
-        }
+        totalQuestion.setText(1 + "/" + quesList.size());
+        setMarkForReviewUI(0);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -390,55 +343,17 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
             @SuppressLint("UseSparseArrays")
             @Override
             public void onPageSelected(int position) {
-                if (position == 0) {
-                    if (Const.hashMapMarkSelected.containsKey(quesList.get(position).getTest_question_id())) {
-                        markButton.setText("Mark for\n Review");
-                        rl_view_marked.setVisibility(View.VISIBLE);
-                    } else if (Const.hashMapSelectMarkReview.containsKey(quesList.get(position).getTest_question_id())) {
-                        markButton.setText("Mark for\n Review");
-                        rl_view_marked.setVisibility(View.VISIBLE);
-                    }/*else if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
-                                        clearButton.setText("Clear\n Selection");
-                                        clearButton.setTextColor(Color.parseColor("#FFFFFF"));
-                                    }*/ else {
-                        markButton.setText("Mark for Review");
-                        rl_view_marked.setVisibility(View.GONE);
-                        //clearButton.setText("Clear Selection");
-                        //clearButton.setTextColor(Color.parseColor("#B9BBBB"));
-                    }
 
-                } else {
-                    if (Const.hashMapMarkSelected.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())) {
-                        markButton.setText("Mark for\n Review");
-                        rl_view_marked.setVisibility(View.VISIBLE);
-                    } else if (Const.hashMapSelectMarkReview.containsKey(quesList.get(position).getTest_question_id())) {
-                        markButton.setText("Mark for\n Review");
-                        rl_view_marked.setVisibility(View.VISIBLE);
-                    }/*else if (Const.answerStoreHash.containsKey(quesList.get(viewPager.getCurrentItem()).getTest_question_id())){
-                                        clearButton.setText("Clear\n Selection");
-                                        clearButton.setTextColor(Color.parseColor("#FFFFFF"));
-                                    }*/ else {
-                        markButton.setText("Mark for Review");
-                        rl_view_marked.setVisibility(View.GONE);
-                        //clearButton.setText("Clear Selection");
-                        //clearButton.setTextColor(Color.parseColor("#B9BBBB"));
+                setMarkForReviewUI(position);
 
-                    }
-                }
-
-                if (position + 1 == listHashMap.size()) {
-                    submitButton.setText("Save");//& Finish
+                if (position + 1 == quesList.size()) {
+                    submitButton.setText("Save");//Finish
                 } else {
                     submitButton.setText("Save & Next");
                 }
-
-                totalQuestion.setText(position + 1 + "/" + listHashMap.size());
+                totalQuestion.setText(position + 1 + "/" + quesList.size());
                 submitButton.setVisibility(View.GONE);
                 Const.QUES_STATUS = "0";
-                //clearButton.setEnabled(false);
-                // clearButton.setTextColor(Color.parseColor("#B9BBBB"));
-
-                //clearButton.setBackgroundResource(R.drawable.disable_back_gradient);
             }
 
             @Override
@@ -501,9 +416,25 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         });
 
 
-        String index = AppPreferenceManager.getTopicPageIndex(quiz_id, Const.TYPE_ID);
-        viewPager.setCurrentItem(Integer.parseInt(index));
+//        String index = AppPreferenceManager.getTopicPageIndex(quiz_id, Const.TYPE_ID);
 
+        for (TopicResponseSchema topicResponseSchema : mQuizOfflineStateHandler.getmQuizAllQuestionTopicWiseResponseSchema().getTopicResonseSchema()) {
+            if (TextUtils.equals(Const.TYPE_ID, topicResponseSchema.getSectionId())) {
+                int index = topicResponseSchema.getTopicIndex();
+                viewPager.setCurrentItem(index);
+            }
+        }
+
+    }
+
+    private void setMarkForReviewUI(int position) {
+        if (quesList.get(position).isMarked()) {
+            rl_view_marked.setVisibility(View.VISIBLE);
+            markButton.setVisibility(View.GONE);
+        } else {
+            markButton.setVisibility(View.VISIBLE);
+            rl_view_marked.setVisibility(View.GONE);
+        }
     }
 
     protected void nextQuestion() {
@@ -663,15 +594,11 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
 
                             if (status.equalsIgnoreCase("203")) {
                                 startActivity(new Intent(mContext, ResultPannelActivity.class));
-                                Const.answerStoreHash.clear();
-                                Const.answerQuestionStoreHash.clear();
-                                Const.questionAnswerStoreHash.clear();
-                                Const.hashMapSelected.clear();
-                                Const.hashMapMarkSelected.clear();
-                                Const.hashMapSelectMarkReview.clear();
-                                Const.answerCheckHash.clear();
                                 AppPreferenceManager.deleteQuizState(quiz_id);
+                                deleteQuizFromDB();
                                 finish();
+                            } else if (!TextUtils.isEmpty(message)) {
+                                UtilFunctions.showToast(message);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -699,6 +626,16 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         AppWebService.getInstance(mContext).addToRequestQueue(request);
     }
 
+    protected void saveCurrentTopic() {
+        for (TopicResponseSchema topicResponseSchema : mQuizOfflineStateHandler.getmQuizAllQuestionTopicWiseResponseSchema().getTopicResonseSchema()) {
+            topicResponseSchema.setResumable(false);
+            if (TextUtils.equals(Const.TYPE_ID, topicResponseSchema.getSectionId())) {
+                topicResponseSchema.setTopicIndex(viewPager.getCurrentItem());
+                topicResponseSchema.setResumable(true);
+            }
+        }
+    }
+
     protected void saveTopicState() {
         String timePaused = tv_total_time.getText().toString().trim();
         AppPreferenceManager.addTopicState(quiz_id, Const.TYPE_ID, timePaused, String.valueOf(viewPager.getCurrentItem()));
@@ -708,8 +645,44 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         AppPreferenceManager.saveOfflineAttemptStates(quiz_id, attemptedOfflineQuestions);
     }
 
-    protected void saveQuizQuestions() {
-        if (mQuestionsDispatcher != null && mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema() != null)
-            AppPreferenceManager.saveQuizQuestions(quiz_id, mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema());
+    protected void saveQuiz(QuizOfflineStateHandler.QuizSaveListener listener) {
+        mQuizOfflineStateHandler.saveQuiz(listener);
+    }
+
+    protected void deleteQuizFromDB() {
+        mQuizOfflineStateHandler.deleteQuizFromDB();
+    }
+
+    protected void saveCurrentQuizState(final boolean isMarkedForReview) {
+        // "Mark for Review" is clicked
+        QuestionDetailsResponseSchema questionDetailsResponseSchema = quesList.get(viewPager.getCurrentItem());
+        questionDetailsResponseSchema.setAnswered(true);
+        gridReviewAdapter.notifyDataSetChanged();
+        listReviewAdapter.notifyItemChanged(viewPager.getCurrentItem());
+        saveCurrentTopic();
+        saveTopicState();
+        saveQuiz(new QuizOfflineStateHandler.QuizSaveListener() {
+            @Override
+            public void onQuizSaved() {
+                if (!isMarkedForReview) {
+                    //Save answer in Local storage
+                    AppPreferenceManager.addAnswer(quiz_id, Const.TYPE_ID, Const.CHOOSE_QUESTION_ID + AppPreferenceManager.DELIMITER + Const.ANSWER_ID);
+                    if (InternetCheck.isInternetOn(ParentQuizActivity.this)) {
+                        callSubmitAnswerAPI();
+                        return;
+                    } else {
+                        Hashtable<String, String> params = new Hashtable<>();
+                        params.put("test_id", Const.STUDENT_TEST_ID);
+                        params.put("qus_id", Const.CHOOSE_QUESTION_ID);
+                        params.put("answers_id", Const.ANSWER_ID);
+                        params.put("question_status", "1");
+                        attemptedOfflineQuestions.add(params);
+                        saveOfflineAttempts();
+                    }
+                }
+                nextQuestion();
+            }
+        });
+
     }
 }

@@ -1,7 +1,10 @@
 package com.example.testproject.Model;
 
 public class FullQuestionSetGet {
-    public String test_question,test_question_id,test_directions;
+    public String test_question, test_question_id, test_directions;
+
+    public boolean is_marked;
+    public String optionSelected;
 
     public String getTest_question() {
         return test_question;
