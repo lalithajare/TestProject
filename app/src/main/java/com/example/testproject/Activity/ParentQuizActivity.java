@@ -196,7 +196,6 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
 
     }
 
-
     protected abstract void setViews();
 
     protected void submitOfflineAnswersAndFinish(String testId, String questId, String ansId) {
@@ -266,6 +265,8 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                 Const.TYPE_ID = topicList.get(position).full_length_type_id;
                 Const.TYPE_NAME = topicList.get(position).full_length_type_name;
 
+//                mQuestionsDispatcher.initializeChosenAnswers(Const.TYPE_ID);
+
                 if (submitButton.getVisibility() == View.VISIBLE) {
                     submitButton.setVisibility(View.GONE);
                     submitButton.setText("Save & Next");
@@ -280,34 +281,6 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
             }
         });
     }
-
-//    private void parseTopicResponse(String response) throws JSONException {
-//        JSONObject object = new JSONObject(response);
-//        Log.d("FullResponse", "onResponse: " + response);
-//        String status = object.getString("status_code");
-//        String message = object.getString("message");
-//        if (status.equalsIgnoreCase("200")) {
-//            JSONObject msgObject = object.getJSONObject("message");
-//            Const.STUDENT_TEST_ID = msgObject.getString("student_test_id");
-//            JSONArray jsonArray = msgObject.getJSONArray("quiz_dtls");
-//            topicList.clear();
-//            strings.clear();
-//            FullTopicTest fullTopicTest;
-//            for (int i = 0; i < jsonArray.length(); i++) {
-//                JSONObject object1 = jsonArray.getJSONObject(i);
-//                fullTopicTest = new FullTopicTest(object1.getString("type_id"), object1.getString("type_name"),
-//                        object1.getString("duration"), object1.getString("total_question"),
-//                        object1.getString("count"));
-//
-//                topicList.add(fullTopicTest);
-//                strings.add(topicList.get(i).full_length_type_name);
-//            }
-//        } else {
-//            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-//            spinner_topic.setVisibility(View.GONE);
-//
-//        }
-//    }
 
     protected void getQuizData() {
         noDataImage.setVisibility(View.GONE);

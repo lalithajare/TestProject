@@ -15,12 +15,15 @@ import java.util.Set;
 
 public class AppPreferenceManager {
 
-    private static final String DELIMITER = "~";
+    public static final String DELIMITER = "~";
 
     private static final String SAVED_TOPIC_STATES = "quizes_ids_and_times_page_index";
     private static final String SAVED_TOPICS_OFFLINE_ATTEMPT_STATES = "quizes_offline_attempts";
     private static final String SAVED_QUIZ_QUESTIONS = "quiz_questions";
     private static final String MAP_QUIZ_TIME = "quiz_time";
+    private static final String SAVED_CHOSEN_ANSWERS = "chosen_answers";
+
+    // *************************************** QUIZ - GENERAL STATE **************************************************
 
     public static void addTopicState(String quizId, String topicId, String quizPauseTime, String pagerIndex) {
 
@@ -93,6 +96,11 @@ public class AppPreferenceManager {
         return "0";
     }
 
+    // *************************************** QUIZ - GENERAL STATE **************************************************
+
+
+    // *************************************** QUIZ - DELETE RECORDS **************************************************
+
 
     public static void deleteQuizState(String quizId) {
 
@@ -128,7 +136,23 @@ public class AppPreferenceManager {
                 .getSharedPreferences()
                 .edit().putStringSet(MAP_QUIZ_TIME, savedQuizTimes).apply();
 
+        //Delete Quiz Questions
+        getAllSavedQuizesQuestions().remove(quizId);
+
+        //Delete Quiz saved answers
+        java.lang.reflect.Type type = new TypeToken<HashMap<String, HashMap<String, ArrayList<String>>>>() {
+        }.getType();
+        HashMap<String, HashMap<String, ArrayList<String>>> quizAnswers = new Gson().fromJson(MyApplication.getAppInstance()
+                .getSharedPreferences()
+                .getString(SAVED_CHOSEN_ANSWERS, new Gson().toJson(new HashMap<String, HashMap<String, ArrayList<String>>>())), type);
+        quizAnswers.remove(quizId);
+        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_CHOSEN_ANSWERS
+                , new Gson().toJson(quizAnswers)).apply();
     }
+    // *************************************** QUIZ - DELETE RECORDS **************************************************
+
+
+    // *************************************** QUIZ - OFFLINE ATTEMPTS **************************************************
 
     public static void saveOfflineAttemptStates(String quizId, ArrayList<Hashtable<String, String>> offlineAttempts) {
         HashMap<String, ArrayList<Hashtable<String, String>>> attemptStates = getAllTestsAndOfflineAttemptStates();
@@ -151,6 +175,11 @@ public class AppPreferenceManager {
         return null;
     }
 
+    // *************************************** QUIZ - OFFLINE ATTEMPTS **************************************************
+
+
+    // *************************************** QUIZ - QUESTIONS **************************************************
+
     //quiz_id, QuizAllQuestionTopicWiseResponseSchema
     public static HashMap<String, QuizAllQuestionTopicWiseResponseSchema> getAllSavedQuizesQuestions() {
         java.lang.reflect.Type type = new TypeToken<HashMap<String, QuizAllQuestionTopicWiseResponseSchema>>() {
@@ -170,5 +199,46 @@ public class AppPreferenceManager {
         savedQuizes.put(quizId, quizAllQuestionTopicWiseResponseSchema);
         MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_QUIZ_QUESTIONS, new Gson().toJson(savedQuizes)).apply();
     }
+    // *************************************** QUIZ - QUESTIONS **************************************************
+
+
+    // ***************************************  CHOSEN OPTIONS **************************************************
+
+    public static void addAnswer(String quizId, String topicId, String questAns) {
+        java.lang.reflect.Type type = new TypeToken<HashMap<String, HashMap<String, ArrayList<String>>>>() {
+        }.getType();
+        HashMap<String, HashMap<String, ArrayList<String>>> quizAnswers = new Gson().fromJson(MyApplication.getAppInstance()
+                .getSharedPreferences()
+                .getString(SAVED_CHOSEN_ANSWERS, new Gson().toJson(new HashMap<String, HashMap<String, ArrayList<String>>>())), type);
+        HashMap<String, ArrayList<String>> topicAnswers = quizAnswers.get(quizId);
+        ArrayList<String> questAnsList;
+        if (topicAnswers != null && topicAnswers.size() > 0) {
+            if (topicAnswers.get(topicId) != null && topicAnswers.get(topicId).size() > 0) {
+                questAnsList = topicAnswers.get(topicId);
+            } else {
+                questAnsList = new ArrayList<>();
+            }
+        } else {
+            topicAnswers = new HashMap();
+            questAnsList = new ArrayList<>();
+        }
+        questAnsList.add(questAns);
+        topicAnswers.put(topicId, questAnsList);
+        quizAnswers.put(quizId, topicAnswers);
+        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_CHOSEN_ANSWERS
+                , new Gson().toJson(quizAnswers)).apply();
+    }
+
+    //ArrayList<String> ==> String -> question_id~optionIndex
+    public static HashMap<String, ArrayList<String>> getAllChosenOptionForQuiz(String quizId) {
+        java.lang.reflect.Type type = new TypeToken<HashMap<String, HashMap<String, ArrayList<String>>>>() {
+        }.getType();
+        HashMap<String, HashMap<String, ArrayList<String>>> answers = new Gson().fromJson(MyApplication.getAppInstance()
+                .getSharedPreferences()
+                .getString(SAVED_CHOSEN_ANSWERS, new Gson().toJson(new HashMap<String, HashMap<String, ArrayList<String>>>())), type);
+        return answers.get(quizId);
+    }
+
+    // ***************************************  CHOSEN OPTIONS **************************************************
 
 }

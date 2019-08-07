@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.example.testproject.Adapter.BigGridReviewAdapter;
 import com.example.testproject.Adapter.BigRecycleReviewAdapter;
 import com.example.testproject.R;
+import com.example.testproject.Utils.AppPreferenceManager;
 import com.example.testproject.Utils.Const;
 import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.InternetCheck;
@@ -63,7 +64,6 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                         Const.hashMapSelectMarkReview.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
                         Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
                         Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-
                     } else {
                         Const.hashMapMarkSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
                         Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
@@ -207,6 +207,10 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                         Const.hashMapSelectMarkReview.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
                         Const.hashMapSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
                     }
+
+
+                    //Save answer in Local storage
+                    AppPreferenceManager.addAnswer(quiz_id, Const.TYPE_ID, Const.CHOOSE_QUESTION_ID + AppPreferenceManager.DELIMITER + Const.ANSWER_ID);
 
                     if (InternetCheck.isInternetOn(FullTestQuizActivity.this)) {
                         callSubmitAnswerAPI();

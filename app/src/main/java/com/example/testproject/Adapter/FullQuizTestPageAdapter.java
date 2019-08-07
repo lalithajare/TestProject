@@ -82,7 +82,7 @@ public class FullQuizTestPageAdapter extends PagerAdapter {
         View myView = inflater.inflate(R.layout.full_freetest_layout, container, false);
         question_no = myView.findViewById(R.id.question_no);
         question_body = myView.findViewById(R.id.question_body);
-        final ExpandableTextView tv_direction=myView.findViewById(R.id.tv_direction);
+        final ExpandableTextView tv_direction = myView.findViewById(R.id.tv_direction);
         final WebView expandableTextView = myView.findViewById(R.id.expandableTextView);
         final Button btn_toggle = myView.findViewById(R.id.btn_toggle);
         int no = position + 1;
@@ -94,11 +94,11 @@ public class FullQuizTestPageAdapter extends PagerAdapter {
 
         /*for (Map.Entry<String, ?> entry : pref.getAll().entrySet()) {
             Const.answerCheckHash.put(entry.getKey(), String.valueOf(position));*/
-            if (Const.answerCheckHash.size() > 0 && Const.answerCheckHash.containsKey(quesList.get(position).getTest_question_id())) {
-                answerAdapter = new FullTestAnswerAdapter(context, listHashMap.get(quesList.get(position).getTest_question_id()), quesList.get(position).getTest_question(), quesList.get(position).getTest_question_id(), submitButton/*,clearButton*/, Integer.parseInt(Const.answerCheckHash.get(quesList.get(position).getTest_question_id())));
-            } else {
-                answerAdapter = new FullTestAnswerAdapter(context, listHashMap.get(quesList.get(position).getTest_question_id()), quesList.get(position).getTest_question(), quesList.get(position).getTest_question_id(), submitButton,/* clearButton,*/-1);
-            }
+        if (Const.answerCheckHash.size() > 0 && Const.answerCheckHash.containsKey(quesList.get(position).getTest_question_id())) {
+            answerAdapter = new FullTestAnswerAdapter(context, listHashMap.get(quesList.get(position).getTest_question_id()), quesList.get(position).getTest_question(), quesList.get(position).getTest_question_id(), submitButton/*,clearButton*/, Integer.parseInt(Const.answerCheckHash.get(quesList.get(position).getTest_question_id())));
+        } else {
+            answerAdapter = new FullTestAnswerAdapter(context, listHashMap.get(quesList.get(position).getTest_question_id()), quesList.get(position).getTest_question(), quesList.get(position).getTest_question_id(), submitButton,/* clearButton,*/-1);
+        }
 
         /*}*/
         question_body.loadDataWithBaseURL(null, quesList.get(position).getTest_question(), "text/html", "utf-8", null);
@@ -120,19 +120,19 @@ public class FullQuizTestPageAdapter extends PagerAdapter {
             @Override
             public void onClick(final View v) {
 
-                if (btn_toggle.getText().toString().equalsIgnoreCase("Read More")){
-                    if (tv_direction.getVisibility()==View.VISIBLE){
+                if (btn_toggle.getText().toString().equalsIgnoreCase("Read More")) {
+                    if (tv_direction.getVisibility() == View.VISIBLE) {
                         btn_toggle.setText(R.string.readMore);
                         expandableTextView.setVisibility(View.VISIBLE);
                         tv_direction.setVisibility(View.GONE);
                         expandableTextView.loadDataWithBaseURL(null, quesList.get(position).getTest_directions(), "text/html", "utf-8", null);
-                        if (expandableTextView.getVisibility()==View.VISIBLE){
+                        if (expandableTextView.getVisibility() == View.VISIBLE) {
                             btn_toggle.setText(R.string.readLess);
                             tv_direction.setVisibility(View.GONE);
 
                         }
                     }
-                }else {
+                } else {
                     expandableTextView.setVisibility(View.GONE);
                     btn_toggle.setText(R.string.readMore);
                     tv_direction.setVisibility(View.VISIBLE);
