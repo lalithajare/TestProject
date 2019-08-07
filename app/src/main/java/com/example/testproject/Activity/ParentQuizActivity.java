@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -45,9 +45,13 @@ import com.android.volley.toolbox.StringRequest;
 import com.example.testproject.Adapter.BigGridReviewAdapter;
 import com.example.testproject.Adapter.BigRecycleReviewAdapter;
 import com.example.testproject.Adapter.FullQuizTestPageAdapter;
+import com.example.testproject.Model.AnswerDetailsSchema;
 import com.example.testproject.Model.AnswerSetGet;
 import com.example.testproject.Model.FullQuestionSetGet;
 import com.example.testproject.Model.FullTopicTest;
+import com.example.testproject.Model.QuestionDetailsResponseSchema;
+import com.example.testproject.Model.QuizAllQuestionTopicWiseResponseSchema;
+import com.example.testproject.Model.TopicResponseSchema;
 import com.example.testproject.R;
 import com.example.testproject.URLs.UrlsAvision;
 import com.example.testproject.Utils.AppPreferenceManager;
@@ -55,7 +59,7 @@ import com.example.testproject.Utils.AppWebService;
 import com.example.testproject.Utils.Const;
 import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.CustomViewPager;
-import com.example.testproject.Utils.InternetCheck;
+import com.example.testproject.Utils.QuizQuestionsDispatcher;
 import com.example.testproject.Utils.UtilFunctions;
 import com.example.testproject.common.ApiCallManager;
 
@@ -69,7 +73,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Objects;
 
 abstract public class ParentQuizActivity extends AppCompatActivity {
 
@@ -120,6 +123,8 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
     protected ArrayList<Hashtable<String, String>> attemptedOfflineQuestions = new ArrayList<>();
     protected Button test_finish_button;
     protected String TAG = ParentQuizActivity.class.getSimpleName();
+
+    protected QuizQuestionsDispatcher mQuestionsDispatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,7 +196,6 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
 
     }
 
-
     protected abstract void setViews();
 
     protected void submitOfflineAnswersAndFinish(String testId, String questId, String ansId) {
@@ -236,211 +240,129 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         });
     }
 
-    protected void callTopicsAPI() {
-        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ_TOPIC, new Response.Listener<String>() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void setTopicsUI() {
+
+        QuizAllQuestionTopicWiseResponseSchema quizAllQuestionTopicWiseResponseSchema = mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema();
+        for (TopicResponseSchema topicResponseSchema : quizAllQuestionTopicWiseResponseSchema.getTopicResonseSchema()) {
+            FullTopicTest fullTopicTest = new FullTopicTest(topicResponseSchema.getSectionId()
+                    , topicResponseSchema.getSectionName()
+                    , topicResponseSchema.getDuration()
+                    , String.valueOf(topicResponseSchema.getQuestionArrayList().size())
+                    , String.valueOf(topicResponseSchema.getQuestionArrayList().size()));
+            topicList.add(fullTopicTest);
+            strings.add(fullTopicTest.full_length_type_name);
+        }
+
+        adapter = new ArrayAdapter(ParentQuizActivity.this, R.layout.free_spinner_layout, strings);
+        spinner_topic.setAdapter(adapter);
+        spinner_topic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject object = new JSONObject(response);
-                    Log.d("FullResponse", "onResponse: " + response);
-                    String status = object.getString("status_code");
-                    String message = object.getString("message");
-                    if (status.equalsIgnoreCase("200")) {
-                        JSONObject msgObject = object.getJSONObject("message");
-                        Const.STUDENT_TEST_ID = msgObject.getString("student_test_id");
-                        JSONArray jsonArray = msgObject.getJSONArray("quiz_dtls");
-                        topicList.clear();
-                        strings.clear();
-                        FullTopicTest fullTopicTest;
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject object1 = jsonArray.getJSONObject(i);
-                            fullTopicTest = new FullTopicTest(object1.getString("type_id"), object1.getString("type_name"),
-                                    object1.getString("duration"), object1.getString("total_question"),
-                                    object1.getString("count"));
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
 
-                            topicList.add(fullTopicTest);
-                            strings.add(topicList.get(i).full_length_type_name);
-                        }
-                        adapter = new ArrayAdapter<String>(Objects.requireNonNull(getApplicationContext()), R.layout.free_spinner_layout, strings);
-                        spinner_topic.setAdapter(adapter);
-                        spinner_topic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                                Const.TYPE_ID = topicList.get(position).full_length_type_id;
-                                Const.TYPE_NAME = topicList.get(position).full_length_type_name;
+                if (quesList != null && !quesList.isEmpty())
+                    saveTopicState();
 
-                                if (quesList != null && !quesList.isEmpty()) {
-                                    saveTestState();
-                                    attemptedOfflineQuestions.clear();
-                                }
+                Const.TYPE_ID = topicList.get(position).full_length_type_id;
+                Const.TYPE_NAME = topicList.get(position).full_length_type_name;
 
-                                if (submitButton.getVisibility() == View.VISIBLE) {
-                                    submitButton.setVisibility(View.GONE);
-                                    submitButton.setText("Save & Next");
-                                }
-                                rl_ques.setVisibility(View.GONE);
+//                mQuestionsDispatcher.initializeChosenAnswers(Const.TYPE_ID);
 
-                                callFullChangeTestQuesAPI();
-
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-
-                            }
-                        });
-
-                    } else {
-                        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-                        spinner_topic.setVisibility(View.GONE);
-
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-
+                if (submitButton.getVisibility() == View.VISIBLE) {
+                    submitButton.setVisibility(View.GONE);
+                    submitButton.setText("Save & Next");
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        }) {
-            @Override
-            public Priority getPriority() {
-                return Priority.IMMEDIATE;
+//                rl_ques.setVisibility(View.GONE);
+                bindQuestionsToTopic();
             }
 
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new Hashtable<>();
-                params.put("quiz_id", getIntent().getStringExtra("quiz_id"));
-                params.put("student_id", "6");
-                params.put("start_time", currentTime);
-                params.put("remaining_time", "0");
-                Log.d("FullLength", "getParams: " + params);
-                return params;
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
             }
-        };
-        request.setRetryPolicy(new DefaultRetryPolicy(30000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        AppWebService.getInstance(getApplicationContext()).addToRequestQueue(request);
+        });
     }
 
-    protected void callFullChangeTestQuesAPI() {
+    protected void getQuizData() {
         noDataImage.setVisibility(View.GONE);
         tryAgainText.setVisibility(View.GONE);
         markButton.setVisibility(View.GONE);
-        //clearButton.setVisibility(View.GONE);
         final Dialog dialog = new Dialog(mContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.full_screen_progress_bar);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.setCancelable(false);
         dialog.show();
-        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ_TOPIC_QUES, new Response.Listener<String>() {
-            @SuppressLint("SetTextI18n")
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+        mQuestionsDispatcher = new QuizQuestionsDispatcher(quiz_id, wasPaused, new QuizQuestionsDispatcher.QuestionsLoadedListener() {
             @Override
-            public void onResponse(String response) {
-                try {
-                    rl_top.setVisibility(View.VISIBLE);
-                    rl_ques.setVisibility(View.VISIBLE);
-                    markButton.setVisibility(View.VISIBLE);
-                    //clearButton.setVisibility(View.VISIBLE);
-                    rl_view_marked.setVisibility(View.GONE);
-                    markButton.setText("Mark for Review");
-                    //clearButton.setText("Clear Selection");
-                    JSONObject examJSON = new JSONObject(response);
-//                    AppPreferenceManager.saveExam(examJSON);
-                    parseExamResponse(examJSON);
-                    dialog.dismiss();
-
-                    if (wasPaused) {
-                        resumeWithSavedTestState();
-                    } else {
-                        startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
-                    }
-
-                } catch (JSONException e) {
-                    noDataImage.setVisibility(View.VISIBLE);
-                    tryAgainText.setVisibility(View.VISIBLE);
-                    dialog.dismiss();
-
-                    e.printStackTrace();
+            public void OnQuestionsLoaded() {
+                dialog.dismiss();
+                topicList.clear();
+                strings.clear();
+                if (wasPaused) {
+                    resumeTime();
+                    getSavedOfflineAttempts();
+                } else {
+                    startChangebleTimer(Float.parseFloat(getIntent().getStringExtra("time")));
                 }
-
+//                bindQuestionsToTopic();
+                setTopicsUI();
             }
-        }, new Response.ErrorListener() {
+
             @Override
-            public void onErrorResponse(VolleyError error) {
+            public void OnQuestionsFailed(VolleyError error) {
+                dialog.dismiss();
                 if (error instanceof TimeoutError)
                     Log.e("Time Out ", "error");
                 noDataImage.setVisibility(View.VISIBLE);
                 tryAgainText.setVisibility(View.VISIBLE);
-                dialog.dismiss();
             }
-        }) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new Hashtable<>();
-                params.put("quiz_id", quiz_id);
-                params.put("type_id", Const.TYPE_ID);
-                Log.d("Quiz", "getParams: " + params);
-                return params;
-            }
-        };
-
-        request.setRetryPolicy(new DefaultRetryPolicy(30000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-        AppWebService.getInstance(this).addToRequestQueue(request);
-
+        });
     }
 
-    protected void parseExamResponse(JSONObject jsonObject) throws JSONException {
-        String status = jsonObject.getString("status_code");
-        String message = jsonObject.getString("message");
-        if (status.equalsIgnoreCase("200")) {
-            JSONArray messageJsonArray = jsonObject.getJSONArray("message");
-            Log.d("Length", "onResponse: " + messageJsonArray.length());
-            quesList = new ArrayList<>();
-            listHashMap = new HashMap<>();
-            FullQuestionSetGet questionSetGet;
-            AnswerSetGet answerSetGet;
-            for (int i = 0; i < messageJsonArray.length(); i++) {
-                JSONObject object1 = messageJsonArray.getJSONObject(i);
-                questionSetGet = new FullQuestionSetGet();
-                questionSetGet.setTest_question(object1.getString("question"));
-                questionSetGet.setTest_question_id(object1.getString("question_id"));
-                questionSetGet.setTest_directions(object1.getString("directions"));
-                quesList.add(questionSetGet);
-                JSONArray jsonArray1 = object1.getJSONArray("answer_dtls");
-                ansList = new ArrayList<>();
-                for (int j = 0; j < jsonArray1.length(); j++) {
-                    JSONObject object2 = jsonArray1.getJSONObject(j);
-                    answerSetGet = new AnswerSetGet();
-                    answerSetGet.setGoal_answers_id(object2.getString("answer_id"));
-                    answerSetGet.setGoal_answer(object2.getString("answer"));
-                    ansList.add(answerSetGet);
+    protected void bindQuestionsToTopic() {
+
+        rl_top.setVisibility(View.VISIBLE);
+        rl_ques.setVisibility(View.VISIBLE);
+        markButton.setVisibility(View.VISIBLE);
+        rl_view_marked.setVisibility(View.GONE);
+        markButton.setText("Mark for Review");
+
+        quesList = new ArrayList<>();
+        listHashMap = new HashMap<>();
+
+        ArrayList<TopicResponseSchema> topicResponseSchemas = mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema().getTopicResonseSchema();
+        int noOfQuestionsInTopic = 0;
+        for (TopicResponseSchema topicResponseSchema : topicResponseSchemas) {
+            if (TextUtils.equals(topicResponseSchema.getSectionId(), Const.TYPE_ID)) {
+                for (QuestionDetailsResponseSchema questionDetailsResponseSchema : topicResponseSchema.getQuestionArrayList()) {
+
+                    //Convert API model to Locally used model :- Question List
+                    FullQuestionSetGet fullQuestionSetGet = new FullQuestionSetGet();
+                    fullQuestionSetGet.setTest_question_id(questionDetailsResponseSchema.getQuestionId());
+                    fullQuestionSetGet.setTest_question(questionDetailsResponseSchema.getQuestion());
+                    fullQuestionSetGet.setTest_directions(questionDetailsResponseSchema.getDirections());
+
+                    //Convert API model to Locally used model :- Answer List
+                    ansList = new ArrayList<>();
+                    for (AnswerDetailsSchema answerDetailsSchema : questionDetailsResponseSchema.getAnswerDetails()) {
+                        AnswerSetGet answerSetGet = new AnswerSetGet();
+                        answerSetGet.setGoal_answers_id(answerDetailsSchema.getAnswerId());
+                        answerSetGet.setGoal_answer(answerDetailsSchema.getAnswer());
+                        ansList.add(answerSetGet);
+                    }
+                    listHashMap.put(fullQuestionSetGet.getTest_question_id(), ansList);
+                    quesList.add(fullQuestionSetGet);
+                    noOfQuestionsInTopic++;
                 }
-                listHashMap.put(questionSetGet.getTest_question_id(), ansList);
+
+                break;
             }
-
-            setQuizPagerUI(messageJsonArray);
-
-        } else {
-            noDataImage.setVisibility(View.VISIBLE);
-            tryAgainText.setVisibility(View.VISIBLE);
-            rl_top.setVisibility(View.GONE);
-            Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
         }
+        Const.TOTAL_QUIZ_QUES = String.valueOf(noOfQuestionsInTopic);
+        setQuizPagerUI();
     }
 
-    protected void setQuizPagerUI(JSONArray messageJsonArray) {
+    protected void setQuizPagerUI() {
         FullQuizTestPageAdapter quizTestPageAdapter = new FullQuizTestPageAdapter(getApplicationContext(), quesList, listHashMap, submitButton/*,clearButton*/);
         viewPager.setAdapter(quizTestPageAdapter);
         totalQuestion.setText(1 + "/" + listHashMap.size());
@@ -459,8 +381,6 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
             // clearButton.setText("Clear Selection");
             //  clearButton.setTextColor(Color.parseColor("#B9BBBB"));
         }
-        Const.TOTAL_QUIZ_QUES = String.valueOf(messageJsonArray.length());
-
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -580,10 +500,9 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
             }
         });
 
-        if (wasPaused) {
-            String index = AppPreferenceManager.getTopicPageIndex(quiz_id, Const.TYPE_ID);
-            viewPager.setCurrentItem(Integer.parseInt(index));
-        }
+
+        String index = AppPreferenceManager.getTopicPageIndex(quiz_id, Const.TYPE_ID);
+        viewPager.setCurrentItem(Integer.parseInt(index));
 
     }
 
@@ -662,15 +581,18 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
 
     }
 
-    protected void resumeWithSavedTestState() {
-        String resumeTime = AppPreferenceManager.getTopicPauseTime(quiz_id, Const.TYPE_ID);
+    protected void resumeTime() {
+        String resumeTime = AppPreferenceManager.getQuizPauseTime(quiz_id);
         String strHours = resumeTime.split(":")[0];
         String strMins = resumeTime.split(":")[1];
         String strSecs = resumeTime.split(":")[2];
         float actualTimeLeft = Float.parseFloat(strHours) * 60f + Float.parseFloat(strMins) + Float.parseFloat(strSecs) / 60f;
         startChangebleTimer(actualTimeLeft);
-        ArrayList<Hashtable<String, String>> offlineAttempts = AppPreferenceManager.getOfflineAttemptState(quiz_id, Const.TYPE_ID);
-        if (offlineAttempts != null)
+    }
+
+    protected void getSavedOfflineAttempts() {
+        ArrayList<Hashtable<String, String>> offlineAttempts = AppPreferenceManager.getOfflineAttemptState(quiz_id);
+        if (offlineAttempts != null && !offlineAttempts.isEmpty())
             attemptedOfflineQuestions.addAll(offlineAttempts);
     }
 
@@ -732,6 +654,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        progressDialog.hide();
                         try {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status_code");
@@ -747,11 +670,9 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                                 Const.hashMapMarkSelected.clear();
                                 Const.hashMapSelectMarkReview.clear();
                                 Const.answerCheckHash.clear();
-                                AppPreferenceManager.deleteTestState(quiz_id, Const.TYPE_ID);
+                                AppPreferenceManager.deleteQuizState(quiz_id);
                                 finish();
                             }
-                            progressDialog.hide();
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -778,9 +699,17 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         AppWebService.getInstance(mContext).addToRequestQueue(request);
     }
 
-    protected void saveTestState() {
+    protected void saveTopicState() {
         String timePaused = tv_total_time.getText().toString().trim();
         AppPreferenceManager.addTopicState(quiz_id, Const.TYPE_ID, timePaused, String.valueOf(viewPager.getCurrentItem()));
-        AppPreferenceManager.saveOfflineAttemptStates(quiz_id, Const.TYPE_ID, attemptedOfflineQuestions);
+    }
+
+    protected void saveOfflineAttempts() {
+        AppPreferenceManager.saveOfflineAttemptStates(quiz_id, attemptedOfflineQuestions);
+    }
+
+    protected void saveQuizQuestions() {
+        if (mQuestionsDispatcher != null && mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema() != null)
+            AppPreferenceManager.saveQuizQuestions(quiz_id, mQuestionsDispatcher.getmQuizAllQuestionTopicWiseResponseSchema());
     }
 }

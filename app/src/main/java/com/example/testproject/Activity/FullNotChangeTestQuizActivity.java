@@ -6,10 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,7 +26,6 @@ import com.example.testproject.Utils.InternetCheck;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Hashtable;
-import java.util.Objects;
 
 public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
 
@@ -38,12 +35,9 @@ public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
     protected void onCreate(Bundle savedInstanceState) {
         TAG = FullTestQuizActivity.class.getSimpleName();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_full_test_quiz);
         mContext = FullNotChangeTestQuizActivity.this;
-
         spinner_topic.setEnabled(false);
         spinner_review.setEnabled(false);
-
         setViews();
     }
 
@@ -174,10 +168,13 @@ public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
             }
         });
 
-        if (InternetCheck.isInternetOn(FullNotChangeTestQuizActivity.this)) {
-            callTopicsAPI();
+        if (mQuestionsDispatcher == null) {
+            //Load all the questions for Quiz section-wise
+            //Then show only the questions related to Topic currently selected
+            getQuizData();
         } else {
-            Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
+            //Show only the questions related to Topic currently selected
+            bindQuestionsToTopic();
         }
 
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -319,7 +316,9 @@ public class FullNotChangeTestQuizActivity extends ParentQuizActivity {
                     }
 
                     if (quesList != null && !quesList.isEmpty()) {
-                        saveTestState();
+                        saveTopicState();
+                        saveOfflineAttempts();
+                        saveQuizQuestions();
                     }
 
                     finish();

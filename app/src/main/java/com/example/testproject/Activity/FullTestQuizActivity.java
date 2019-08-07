@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,6 +19,7 @@ import android.widget.Toast;
 import com.example.testproject.Adapter.BigGridReviewAdapter;
 import com.example.testproject.Adapter.BigRecycleReviewAdapter;
 import com.example.testproject.R;
+import com.example.testproject.Utils.AppPreferenceManager;
 import com.example.testproject.Utils.Const;
 import com.example.testproject.Utils.CustomCountDownTimer;
 import com.example.testproject.Utils.InternetCheck;
@@ -64,7 +64,6 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                         Const.hashMapSelectMarkReview.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
                         Const.hashMapMarkSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
                         Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
-
                     } else {
                         Const.hashMapMarkSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
                         Const.hashMapSelected.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
@@ -184,10 +183,13 @@ public class FullTestQuizActivity extends ParentQuizActivity {
             }
         });
 
-        if (InternetCheck.isInternetOn(FullTestQuizActivity.this)) {
-            callTopicsAPI();
+        if (mQuestionsDispatcher == null) {
+            //Load all the questions for Quiz section-wise
+            //Then show only the questions related to Topic currently selected
+            getQuizData();
         } else {
-            Toast.makeText(getApplicationContext(), "No internet", Toast.LENGTH_LONG).show();
+            //Show only the questions related to Topic currently selected
+            bindQuestionsToTopic();
         }
 
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -205,6 +207,10 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                         Const.hashMapSelectMarkReview.remove(quesList.get(viewPager.getCurrentItem()).getTest_question_id());
                         Const.hashMapSelected.put(quesList.get(viewPager.getCurrentItem()).getTest_question_id(), true);
                     }
+
+
+                    //Save answer in Local storage
+                    AppPreferenceManager.addAnswer(quiz_id, Const.TYPE_ID, Const.CHOOSE_QUESTION_ID + AppPreferenceManager.DELIMITER + Const.ANSWER_ID);
 
                     if (InternetCheck.isInternetOn(FullTestQuizActivity.this)) {
                         callSubmitAnswerAPI();
@@ -339,7 +345,9 @@ public class FullTestQuizActivity extends ParentQuizActivity {
                     }
 
                     if (quesList != null && !quesList.isEmpty()) {
-                        saveTestState();
+                        saveTopicState();
+                        saveOfflineAttempts();
+                        saveQuizQuestions();
                     }
 
                     finish();
