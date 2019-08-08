@@ -202,43 +202,4 @@ public class AppPreferenceManager {
     // *************************************** QUIZ - QUESTIONS **************************************************
 
 
-    // ***************************************  CHOSEN OPTIONS **************************************************
-
-    public static void addAnswer(String quizId, String topicId, String questAns) {
-        java.lang.reflect.Type type = new TypeToken<HashMap<String, HashMap<String, ArrayList<String>>>>() {
-        }.getType();
-        HashMap<String, HashMap<String, ArrayList<String>>> quizAnswers = new Gson().fromJson(MyApplication.getAppInstance()
-                .getSharedPreferences()
-                .getString(SAVED_CHOSEN_ANSWERS, new Gson().toJson(new HashMap<String, HashMap<String, ArrayList<String>>>())), type);
-        HashMap<String, ArrayList<String>> topicAnswers = quizAnswers.get(quizId);
-        ArrayList<String> questAnsList;
-        if (topicAnswers != null && topicAnswers.size() > 0) {
-            if (topicAnswers.get(topicId) != null && topicAnswers.get(topicId).size() > 0) {
-                questAnsList = topicAnswers.get(topicId);
-            } else {
-                questAnsList = new ArrayList<>();
-            }
-        } else {
-            topicAnswers = new HashMap();
-            questAnsList = new ArrayList<>();
-        }
-        questAnsList.add(questAns);
-        topicAnswers.put(topicId, questAnsList);
-        quizAnswers.put(quizId, topicAnswers);
-        MyApplication.getAppInstance().getSharedPreferences().edit().putString(SAVED_CHOSEN_ANSWERS
-                , new Gson().toJson(quizAnswers)).apply();
-    }
-
-    //ArrayList<String> ==> String -> question_id~optionIndex
-    public static HashMap<String, ArrayList<String>> getAllChosenOptionForQuiz(String quizId) {
-        java.lang.reflect.Type type = new TypeToken<HashMap<String, HashMap<String, ArrayList<String>>>>() {
-        }.getType();
-        HashMap<String, HashMap<String, ArrayList<String>>> answers = new Gson().fromJson(MyApplication.getAppInstance()
-                .getSharedPreferences()
-                .getString(SAVED_CHOSEN_ANSWERS, new Gson().toJson(new HashMap<String, HashMap<String, ArrayList<String>>>())), type);
-        return answers.get(quizId);
-    }
-
-    // ***************************************  CHOSEN OPTIONS **************************************************
-
 }

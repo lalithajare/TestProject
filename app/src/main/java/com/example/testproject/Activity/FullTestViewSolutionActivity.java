@@ -72,23 +72,24 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
     private ArrayList<QuestionSolutionSetGet> quesSolutionList = new ArrayList<>();
     private ArrayList<AnswerSolutionSetGet> ansSolutionList;
     HashMap<String, ArrayList<AnswerSolutionSetGet>> solutionListHashMap = new HashMap<>();
-    Spinner spinner_topic,spinner_review;
+    Spinner spinner_topic, spinner_review;
     private ArrayList<String> strings = new ArrayList<>();
     ArrayList<FreeTestTopic> topicList = new ArrayList<>();
     RelativeLayout rl_ques;
-    TextView tv_eng,tv_hindi;
+    TextView tv_eng, tv_hindi;
     public DrawerLayout drawerLayout;
     public View drawerView;
     RecyclerView question_listView;
     ImageButton btn_grid, btn_list;
-    ImageButton iv_review,iv_close;
+    ImageButton iv_review, iv_close;
     BigSolutionGridReviewAdapter gridReviewAdapter;
     BigSolutionRecycleReviewAdapter listReviewAdapter;
     GridView question_gridView;
     Switch switch_btn;
-    RelativeLayout rl_top,rl_lang, rl_grid,rl_list;
+    RelativeLayout rl_top, rl_lang, rl_grid, rl_list;
     ArrayAdapter<String> adapter;
     RelativeLayout rl_close;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,26 +100,26 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
         av_caf_loader = findViewById(R.id.av_caf_loader);
         noDataImage = findViewById(R.id.no_data_image);
         tryAgainText = findViewById(R.id.try_again_text);
-        spinner_topic=findViewById(R.id.spinner_topic);
-        rl_ques=findViewById(R.id.rl_ques);
+        spinner_topic = findViewById(R.id.spinner_topic);
+        rl_ques = findViewById(R.id.rl_ques);
         question_gridView = findViewById(R.id.question_gridView);
         drawerLayout = findViewById(R.id.drawer_layout);
         drawerView = findViewById(R.id.drawer);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        iv_review=findViewById(R.id.iv_review);
-        iv_close=findViewById(R.id.iv_close);
-        switch_btn=findViewById(R.id.switch_btn);
-        tv_eng=findViewById(R.id.tv_eng);
-        tv_hindi=findViewById(R.id.tv_hindi);
-        question_listView=findViewById(R.id.question_listView);
-        btn_grid=findViewById(R.id.btn_grid);
-        btn_list=findViewById(R.id.btn_list);
-        rl_top=findViewById(R.id.rl_top);
-        rl_lang=findViewById(R.id.rl_lang);
-        rl_grid=findViewById(R.id.rl_grid);
-        rl_list=findViewById(R.id.rl_list);
-        rl_close=findViewById(R.id.rl_close);
-        spinner_review=findViewById(R.id.spinner_review);
+        iv_review = findViewById(R.id.iv_review);
+        iv_close = findViewById(R.id.iv_close);
+        switch_btn = findViewById(R.id.switch_btn);
+        tv_eng = findViewById(R.id.tv_eng);
+        tv_hindi = findViewById(R.id.tv_hindi);
+        question_listView = findViewById(R.id.question_listView);
+        btn_grid = findViewById(R.id.btn_grid);
+        btn_list = findViewById(R.id.btn_list);
+        rl_top = findViewById(R.id.rl_top);
+        rl_lang = findViewById(R.id.rl_lang);
+        rl_grid = findViewById(R.id.rl_grid);
+        rl_list = findViewById(R.id.rl_list);
+        rl_close = findViewById(R.id.rl_close);
+        spinner_review = findViewById(R.id.spinner_review);
         tryAgainText.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
@@ -150,11 +151,11 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
         }
         switch_btn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
+                if (isChecked) {
                     tv_hindi.setTextColor(getResources().getColor(R.color.white));
                     tv_eng.setTextColor(getResources().getColor(R.color.clearColor));
 
-                }else {
+                } else {
                     tv_eng.setTextColor(getResources().getColor(R.color.white));
                     tv_hindi.setTextColor(getResources().getColor(R.color.clearColor));
                 }
@@ -188,7 +189,7 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
                 question_gridView.setAdapter(gridReviewAdapter);
 
                 listReviewAdapter = new BigSolutionRecycleReviewAdapter(context, quesSolutionList);
-                question_listView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayout.VERTICAL,false));
+                question_listView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayout.VERTICAL, false));
                 question_listView.setAdapter(listReviewAdapter);
             }
         });
@@ -238,12 +239,12 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
         spinner_review.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                if (position==spinner_topic.getSelectedItemPosition()){
+                if (position == spinner_topic.getSelectedItemPosition()) {
 
-                }else {
+                } else {
                     Const.TYPE_ID = topicList.get(position).courseId;
                     rl_ques.setVisibility(View.GONE);
-                    spinner_topic.setSelection(spinner_review.getSelectedItemPosition() );
+                    spinner_topic.setSelection(spinner_review.getSelectedItemPosition());
                     drawerLayout.closeDrawer(drawerView);
                 }
 
@@ -255,6 +256,7 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
             }
         });
     }
+
     private void getFullTestTopic() {
         noDataImage.setVisibility(View.GONE);
         tryAgainText.setVisibility(View.GONE);
@@ -327,10 +329,11 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
 
         AppWebService.getInstance(getApplicationContext()).addToRequestQueue(request);
     }
+
     private void getViewSolition() {
         noDataImage.setVisibility(View.GONE);
         tryAgainText.setVisibility(View.GONE);
-        final Dialog dialog=new Dialog(context);
+        final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.full_screen_progress_bar);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -401,7 +404,7 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
                         question_gridView.setAdapter(gridReviewAdapter);
 
                         listReviewAdapter = new BigSolutionRecycleReviewAdapter(context, quesSolutionList);
-                        question_listView.setLayoutManager(new LinearLayoutManager(getApplicationContext(),LinearLayout.VERTICAL,false));
+                        question_listView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayout.VERTICAL, false));
                         question_listView.setAdapter(listReviewAdapter);
 
                         question_listView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
@@ -484,6 +487,7 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
                 params.put("test_id", Const.STUDENT_TEST_ID);
+                params.put("test_taken_id", Const.STUDENT_TEST_TAKEN_ID);
                 params.put("type_id", Const.TYPE_ID);
                 Log.d("FullSolutionValue", "getParams: " + params);
                 return params;
@@ -500,10 +504,10 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                if (drawerLayout.isDrawerOpen(drawerView)){
+                if (drawerLayout.isDrawerOpen(drawerView)) {
                     drawerLayout.closeDrawer(drawerView);
 
-                }else {
+                } else {
                     finish();
 
                     /*AlertDialog.Builder builder = new AlertDialog.Builder(this);

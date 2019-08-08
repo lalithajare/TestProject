@@ -81,7 +81,7 @@ public class QuizOfflineStateHandler {
             loadQuestionsTask.execute(quizId);
         } else {
             //Call API
-            ApiCallManager.getInstance(MyApplication.getAppInstance()).callTopicWiseQuestionsAPI(quizId, new ApiCallManager.ApiResponseListener() {
+            ApiCallManager.getInstance(MyApplication.getAppInstance()).callTopicWiseQuestionsAPI(quizId, "6", new ApiCallManager.ApiResponseListener() {
                 @Override
                 public void onSuccess(String response) {
                     mQuizAllQuestionTopicWiseResponseSchema = new Gson().fromJson(response, QuizAllQuestionTopicWiseResponseSchema.class);

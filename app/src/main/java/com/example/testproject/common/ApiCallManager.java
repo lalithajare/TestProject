@@ -188,7 +188,7 @@ public class ApiCallManager {
     //      Gets all the questions in a Quiz Topic wise
     //------------------------------------------------
 
-    public void callTopicWiseQuestionsAPI(final String quizId, final ApiResponseListener listener) {
+    public void callTopicWiseQuestionsAPI(final String quizId, final String studentId, final ApiResponseListener listener) {
         StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ_ALL_QUES, new Response.Listener<String>() {
             @SuppressLint("SimpleDateFormat")
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -215,6 +215,7 @@ public class ApiCallManager {
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
                 params.put("quiz_id", quizId);
+                params.put("student_id", studentId);
                 Log.d("SubmitFullAnswerValue", "getParams: " + params);
                 return params;
             }

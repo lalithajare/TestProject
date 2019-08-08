@@ -13,6 +13,9 @@ public class QuizAllQuestionTopicWiseResponseSchema implements Serializable {
     @SerializedName("message")
     private String message;
 
+    @SerializedName("test_taken_id")
+    private String testTakenId;
+
     @SerializedName("marks_scored")
     private ArrayList<TopicResponseSchema> topicResonseSchema;
 
@@ -38,5 +41,13 @@ public class QuizAllQuestionTopicWiseResponseSchema implements Serializable {
 
     public void setTopicResonseSchema(ArrayList<TopicResponseSchema> topicResonseSchema) {
         this.topicResonseSchema = topicResonseSchema;
+    }
+
+    public String getTestTakenId() {
+        return testTakenId;
+    }
+
+    public void setTestTakenId(String testTakenId) {
+        this.testTakenId = testTakenId;
     }
 }

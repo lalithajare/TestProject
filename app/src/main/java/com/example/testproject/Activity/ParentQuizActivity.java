@@ -45,6 +45,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.example.testproject.Adapter.BigGridReviewAdapter;
 import com.example.testproject.Adapter.BigRecycleReviewAdapter;
 import com.example.testproject.Adapter.FullQuizTestPageAdapter;
+import com.example.testproject.Model.AnswerDetailsSchema;
 import com.example.testproject.Model.FullTopicTest;
 import com.example.testproject.Model.QuestionDetailsResponseSchema;
 import com.example.testproject.Model.QuizAllQuestionTopicWiseResponseSchema;
@@ -130,6 +131,10 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
 
     private void initData() {
         quiz_id = getIntent().getStringExtra("quiz_id");
+
+        Const.STUDENT_TEST_ID = quiz_id;
+        Const.TEST_ID = quiz_id;
+
         totalTime = getIntent().getStringExtra("time");
         wasPaused = getIntent().getBooleanExtra("was_paused", false);
 
@@ -288,6 +293,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                 dialog.dismiss();
                 topicList.clear();
                 strings.clear();
+                Const.STUDENT_TEST_TAKEN_ID = mQuizOfflineStateHandler.getmQuizAllQuestionTopicWiseResponseSchema().getTestTakenId();
                 if (wasPaused) {
                     resumeTime();
                     getSavedOfflineAttempts();
@@ -452,7 +458,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         }
     }
 
-    protected void callSubmitAnswerAPI() {
+    protected void callSubmitAnswerAPI(final String questionId, final String answerId) {
         answerLoad.setVisibility(View.VISIBLE);
         answerLoad.setClickable(false);
         answerLoad.setIndeterminate(true);
@@ -487,8 +493,8 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                 }
                 Hashtable<String, String> params = new Hashtable<>();
                 params.put("test_id", Const.STUDENT_TEST_ID);
-                params.put("qus_id", Const.CHOOSE_QUESTION_ID);
-                params.put("answers_id", Const.ANSWER_ID);
+                params.put("qus_id", questionId);
+                params.put("answers_id", answerId);
                 params.put("question_status", "1");
                 attemptedOfflineQuestions.add(params);
             }
@@ -497,8 +503,8 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
                 params.put("test_id", Const.STUDENT_TEST_ID);
-                params.put("qus_id", Const.CHOOSE_QUESTION_ID);
-                params.put("answers_id", Const.ANSWER_ID);
+                params.put("qus_id", questionId);
+                params.put("answers_id", answerId);
                 params.put("question_status", "1");
                 Log.d("SubmitFullAnswerValue", "getParams: " + params);
                 return params;
@@ -593,9 +599,16 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                             Log.d("MarkSection", "onResponse: " + status);
 
                             if (status.equalsIgnoreCase("203")) {
-                                startActivity(new Intent(mContext, ResultPannelActivity.class));
-                                AppPreferenceManager.deleteQuizState(quiz_id);
-                                deleteQuizFromDB();
+                                Intent intent = new Intent(mContext, ResultPannelActivity.class);
+                                startActivity(intent);
+//                                new Handler().post(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        AppPreferenceManager.deleteQuizState(quiz_id);
+//                                        deleteQuizFromDB();
+//                                        finish();
+//                                    }
+//                                });
                                 finish();
                             } else if (!TextUtils.isEmpty(message)) {
                                 UtilFunctions.showToast(message);
@@ -614,13 +627,13 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
-                params.put("test_id", Const.TEST_ID);
+                params.put("test_taken_id", Const.STUDENT_TEST_TAKEN_ID);
                 params.put("student_id", "6");
                 Log.d("FinishTest", "getParams: " + params);
                 return params;
             }
         };
-        request.setRetryPolicy(new DefaultRetryPolicy(20000,
+        request.setRetryPolicy(new DefaultRetryPolicy(50000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         AppWebService.getInstance(mContext).addToRequestQueue(request);
@@ -654,27 +667,37 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
     }
 
     protected void saveCurrentQuizState(final boolean isMarkedForReview) {
+
+        final String questionId = quesList.get(viewPager.getCurrentItem()).getQuestionId();
+        String answerId = "";
+        for (AnswerDetailsSchema answerDetailsSchema : quesList.get(viewPager.getCurrentItem()).getAnswerDetails()) {
+            if (answerDetailsSchema.isSelected()) {
+                answerId = answerDetailsSchema.getAnswerId();
+            }
+        }
+
+
         // "Mark for Review" is clicked
-        QuestionDetailsResponseSchema questionDetailsResponseSchema = quesList.get(viewPager.getCurrentItem());
+        QuestionDetailsResponseSchema
+                questionDetailsResponseSchema = quesList.get(viewPager.getCurrentItem());
         questionDetailsResponseSchema.setAnswered(true);
         gridReviewAdapter.notifyDataSetChanged();
         listReviewAdapter.notifyItemChanged(viewPager.getCurrentItem());
         saveCurrentTopic();
         saveTopicState();
+        final String finalAnswerId = answerId;
         saveQuiz(new QuizOfflineStateHandler.QuizSaveListener() {
             @Override
             public void onQuizSaved() {
                 if (!isMarkedForReview) {
-                    //Save answer in Local storage
-                    AppPreferenceManager.addAnswer(quiz_id, Const.TYPE_ID, Const.CHOOSE_QUESTION_ID + AppPreferenceManager.DELIMITER + Const.ANSWER_ID);
                     if (InternetCheck.isInternetOn(ParentQuizActivity.this)) {
-                        callSubmitAnswerAPI();
+                        callSubmitAnswerAPI(questionId, finalAnswerId);
                         return;
                     } else {
                         Hashtable<String, String> params = new Hashtable<>();
                         params.put("test_id", Const.STUDENT_TEST_ID);
-                        params.put("qus_id", Const.CHOOSE_QUESTION_ID);
-                        params.put("answers_id", Const.ANSWER_ID);
+                        params.put("qus_id", questionId);
+                        params.put("answers_id", finalAnswerId);
                         params.put("question_status", "1");
                         attemptedOfflineQuestions.add(params);
                         saveOfflineAttempts();

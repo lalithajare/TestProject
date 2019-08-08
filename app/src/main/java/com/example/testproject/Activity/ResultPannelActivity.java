@@ -47,13 +47,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ResultPannelActivity extends AppCompatActivity {
+    private static final String TAG = ResultPannelActivity.class.getSimpleName();
     Toolbar toolbar;
     TextView toolbar_title;
     Context context;
 
     ProgressDialog progressDialog;
 
-    RecyclerView rv_top_rankers,rv_section_topic;
+    RecyclerView rv_top_rankers, rv_section_topic;
     public static RecyclerView rv_section_rank;
 
     List<TopRankerSetGet> topRankerList = new ArrayList<>();
@@ -63,7 +64,7 @@ public class ResultPannelActivity extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager_section_topic;
     public static RecyclerView.LayoutManager layoutManager_section_mark;
 
-    TextView tv_view_top_ranker,tv_send_rate_us,tv_result_test_name;
+    TextView tv_view_top_ranker, tv_send_rate_us, tv_result_test_name;
 
     ResultSectionAdapter resultSectionAdapter;
     List<ResultSectionSetGet> resultSectionList = new ArrayList<>();
@@ -72,19 +73,20 @@ public class ResultPannelActivity extends AppCompatActivity {
     public static ResultSectionMarkAdapter resultSectionMarkAdapter;
     public static List<ResultSectionMarkSetGet> resultSectionMarkList = new ArrayList<>();
 
-    TextView tv_result_name,tv_result_score,tv_result_rank,tv_result_time,tv_result_share;
+    TextView tv_result_name, tv_result_score, tv_result_rank, tv_result_time, tv_result_share;
     RelativeLayout rl_refresh_rank;
 
-    TextView tv_correct_mark,tv_wrong_mark,tv_skip_mark;
-    ProgressBar progressBar_correct,progressBar_wrong,progressBar_skip,progressBar_refresh;
+    TextView tv_correct_mark, tv_wrong_mark, tv_skip_mark;
+    ProgressBar progressBar_correct, progressBar_wrong, progressBar_skip, progressBar_refresh;
 
-    Button btn_again_attempt,btn_view_solution,btn_section_view_solution;
+    Button btn_again_attempt, btn_view_solution, btn_section_view_solution;
 
-    public static TextView tv_you_section_mark,tv_topper_section_mark,tv_average_section_mark;
-    public static ProgressBar progressBar_section_you,progressBar_section_topper,progressBar_section_average;
+    public static TextView tv_you_section_mark, tv_topper_section_mark, tv_average_section_mark;
+    public static ProgressBar progressBar_section_you, progressBar_section_topper, progressBar_section_average;
 
     ImageView iv_result_refresh;
     CardView cardView_top4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,43 +105,43 @@ public class ResultPannelActivity extends AppCompatActivity {
             }
         });
 
-        rv_top_rankers=findViewById(R.id.rv_top_rankers);
-        rv_section_topic=findViewById(R.id.rv_section_topic);
-        rv_section_rank=findViewById(R.id.rv_section_rank);
+        rv_top_rankers = findViewById(R.id.rv_top_rankers);
+        rv_section_topic = findViewById(R.id.rv_section_topic);
+        rv_section_rank = findViewById(R.id.rv_section_rank);
 
-        tv_view_top_ranker=findViewById(R.id.tv_view_top_ranker);
-        ratingBar=findViewById(R.id.ratingBar);
-        tv_send_rate_us=findViewById(R.id.tv_send_rate_us);
+        tv_view_top_ranker = findViewById(R.id.tv_view_top_ranker);
+        ratingBar = findViewById(R.id.ratingBar);
+        tv_send_rate_us = findViewById(R.id.tv_send_rate_us);
 
-        tv_result_name=findViewById(R.id.tv_result_name);
-        tv_result_score=findViewById(R.id.tv_result_score);
-        tv_result_rank=findViewById(R.id.tv_result_rank);
-        tv_result_time=findViewById(R.id.tv_result_time);
-        tv_result_share=findViewById(R.id.tv_result_share);
-        tv_correct_mark=findViewById(R.id.tv_correct_mark);
-        tv_wrong_mark=findViewById(R.id.tv_wrong_mark);
-        tv_skip_mark=findViewById(R.id.tv_skip_mark);
-        tv_you_section_mark=findViewById(R.id.tv_you_section_mark);
-        tv_topper_section_mark=findViewById(R.id.tv_topper_section_mark);
-        tv_average_section_mark=findViewById(R.id.tv_average_section_mark);
-        tv_result_test_name=findViewById(R.id.tv_result_test_name);
+        tv_result_name = findViewById(R.id.tv_result_name);
+        tv_result_score = findViewById(R.id.tv_result_score);
+        tv_result_rank = findViewById(R.id.tv_result_rank);
+        tv_result_time = findViewById(R.id.tv_result_time);
+        tv_result_share = findViewById(R.id.tv_result_share);
+        tv_correct_mark = findViewById(R.id.tv_correct_mark);
+        tv_wrong_mark = findViewById(R.id.tv_wrong_mark);
+        tv_skip_mark = findViewById(R.id.tv_skip_mark);
+        tv_you_section_mark = findViewById(R.id.tv_you_section_mark);
+        tv_topper_section_mark = findViewById(R.id.tv_topper_section_mark);
+        tv_average_section_mark = findViewById(R.id.tv_average_section_mark);
+        tv_result_test_name = findViewById(R.id.tv_result_test_name);
 
-        btn_again_attempt=findViewById(R.id.btn_again_attempt);
-        btn_view_solution=findViewById(R.id.btn_view_solution);
-        btn_section_view_solution=findViewById(R.id.btn_section_view_solution);
+        btn_again_attempt = findViewById(R.id.btn_again_attempt);
+        btn_view_solution = findViewById(R.id.btn_view_solution);
+        btn_section_view_solution = findViewById(R.id.btn_section_view_solution);
 
-        progressBar_section_you=findViewById(R.id.progressBar_section_you);
-        progressBar_section_topper=findViewById(R.id.progressBar_section_topper);
-        progressBar_section_average=findViewById(R.id.progressBar_section_average);
-        progressBar_correct=findViewById(R.id.progressBar_correct);
-        progressBar_wrong=findViewById(R.id.progressBar_wrong);
-        progressBar_skip=findViewById(R.id.progressBar_skip);
+        progressBar_section_you = findViewById(R.id.progressBar_section_you);
+        progressBar_section_topper = findViewById(R.id.progressBar_section_topper);
+        progressBar_section_average = findViewById(R.id.progressBar_section_average);
+        progressBar_correct = findViewById(R.id.progressBar_correct);
+        progressBar_wrong = findViewById(R.id.progressBar_wrong);
+        progressBar_skip = findViewById(R.id.progressBar_skip);
 
-        progressBar_refresh=findViewById(R.id.progressBar_refresh);
-        rl_refresh_rank=findViewById(R.id.rl_refresh_rank);
-        iv_result_refresh=findViewById(R.id.iv_result_refresh);
+        progressBar_refresh = findViewById(R.id.progressBar_refresh);
+        rl_refresh_rank = findViewById(R.id.rl_refresh_rank);
+        iv_result_refresh = findViewById(R.id.iv_result_refresh);
 
-        cardView_top4=findViewById(R.id.cardView_top4);
+        cardView_top4 = findViewById(R.id.cardView_top4);
 
         rv_top_rankers.setHasFixedSize(true);
         layoutManager_ranker = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
@@ -158,7 +160,7 @@ public class ResultPannelActivity extends AppCompatActivity {
         tv_view_top_ranker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(context,TopRankerActivity.class));
+                startActivity(new Intent(context, TopRankerActivity.class));
             }
         });
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -170,14 +172,14 @@ public class ResultPannelActivity extends AppCompatActivity {
         tv_send_rate_us.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "Thanks for your rating "+ratingBar.getRating()+"★", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Thanks for your rating " + ratingBar.getRating() + "★", Toast.LENGTH_SHORT).show();
             }
         });
 
         btn_view_solution.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(context,FullTestViewSolutionActivity.class));
+                startActivity(new Intent(context, FullTestViewSolutionActivity.class));
             }
         });
 
@@ -186,7 +188,7 @@ public class ResultPannelActivity extends AppCompatActivity {
             public void onClick(View v) {
                 progressBar_refresh.setVisibility(View.VISIBLE);
                 rl_refresh_rank.setVisibility(View.GONE);
-                Const.END_TIME_STATUS="0";
+                Const.END_TIME_STATUS = "0";
                 getTestScore();
 
             }
@@ -206,8 +208,8 @@ public class ResultPannelActivity extends AppCompatActivity {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status_code");
                             String message = object.getString("message");
-                            if (status.equalsIgnoreCase("203")){
-                                JSONObject scoreObject=object.getJSONObject("marks_scored");
+                            if (status.equalsIgnoreCase("203")) {
+                                JSONObject scoreObject = object.getJSONObject("marks_scored");
                                 tv_correct_mark.setText(scoreObject.getString("count_correct_ans"));
                                 tv_wrong_mark.setText(scoreObject.getString("count_wrong_ans"));
                                 tv_skip_mark.setText(scoreObject.getString("skipped"));
@@ -224,20 +226,23 @@ public class ResultPannelActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                Log.e(TAG, "ERROR : " + error.getLocalizedMessage());
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
                 params.put("test_id", Const.TEST_ID);
+                params.put("test_taken_id", Const.STUDENT_TEST_TAKEN_ID);
                 params.put("student_id", "6");
-                Log.d("OverALlResult", "getParams: "+params);
+                Log.d("OverALlResult", "getParams: " + params);
                 return params;
             }
         };
 
-
+        request.setRetryPolicy(new DefaultRetryPolicy(10000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         AppWebService.getInstance(context).addToRequestQueue(request);
     }
 
@@ -250,35 +255,35 @@ public class ResultPannelActivity extends AppCompatActivity {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status_code");
                             String message = object.getString("message");
-                            Log.d("ScoreBoard", "onResponse: "+response);
-                            if (status.equalsIgnoreCase("203")){
-                                JSONObject scoreObject=object.getJSONObject("marks_scored");
+                            Log.d("ScoreBoard", "onResponse: " + response);
+                            if (status.equalsIgnoreCase("203")) {
+                                JSONObject scoreObject = object.getJSONObject("marks_scored");
                                 progressBar_refresh.setVisibility(View.GONE);
                                 rl_refresh_rank.setVisibility(View.VISIBLE);
                                 tv_result_test_name.setText(scoreObject.getString("quiz_name"));
                                 tv_result_name.setText(getSharedPreferences("ActivityPREF", Context.MODE_PRIVATE).getString("user_name", null));
-                                tv_result_score.setText(scoreObject.getString("total_score") +" / "+scoreObject.getString("test_full_marks"));
-                                tv_result_rank.setText(scoreObject.getString("rank_count") +" / "+scoreObject.getString("total_given_exam"));
+                                tv_result_score.setText(scoreObject.getString("total_score") + " / " + scoreObject.getString("test_full_marks"));
+                                tv_result_rank.setText(scoreObject.getString("rank_count") + " / " + scoreObject.getString("total_given_exam"));
 
-                                if (!scoreObject.getString("hours").equalsIgnoreCase("0")){
-                                    if (!scoreObject.getString("minutes").equalsIgnoreCase("0")){
-                                        tv_result_time.setText(scoreObject.getString("hours") +"hr : "+scoreObject.getString("minutes")
-                                                +"min : "+scoreObject.getString("seconds")+
-                                                "sec / "+scoreObject.getString("test_total_time")+"min");
+                                if (!scoreObject.getString("hours").equalsIgnoreCase("0")) {
+                                    if (!scoreObject.getString("minutes").equalsIgnoreCase("0")) {
+                                        tv_result_time.setText(scoreObject.getString("hours") + "hr : " + scoreObject.getString("minutes")
+                                                + "min : " + scoreObject.getString("seconds") +
+                                                "sec / " + scoreObject.getString("test_total_time") + "min");
 
-                                    }else {
-                                        tv_result_time.setText(scoreObject.getString("seconds")+
-                                                "sec / "+scoreObject.getString("test_total_time")+"min");
+                                    } else {
+                                        tv_result_time.setText(scoreObject.getString("seconds") +
+                                                "sec / " + scoreObject.getString("test_total_time") + "min");
                                     }
-                                }else {
-                                    if (!scoreObject.getString("minutes").equalsIgnoreCase("0")){
+                                } else {
+                                    if (!scoreObject.getString("minutes").equalsIgnoreCase("0")) {
                                         tv_result_time.setText(scoreObject.getString("minutes")
-                                                +"min : "+scoreObject.getString("seconds")+
-                                                "sec / "+scoreObject.getString("test_total_time")+"min");
+                                                + "min : " + scoreObject.getString("seconds") +
+                                                "sec / " + scoreObject.getString("test_total_time") + "min");
 
-                                    }else {
-                                        tv_result_time.setText(scoreObject.getString("seconds")+
-                                                "sec / "+scoreObject.getString("test_total_time")+"min");
+                                    } else {
+                                        tv_result_time.setText(scoreObject.getString("seconds") +
+                                                "sec / " + scoreObject.getString("test_total_time") + "min");
                                     }
                                 }
 
@@ -293,21 +298,23 @@ public class ResultPannelActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
 
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
                 params.put("test_id", Const.TEST_ID);
                 params.put("student_id", "6");
                 params.put("test_end_time", Const.END_TIME);
-                params.put("test_taken_id", Const.STUDENT_TEST_ID);
-                params.put("end_time_status",Const.END_TIME_STATUS);
-                Log.d("ResultScore", "getParams: "+params);
+                params.put("test_taken_id", Const.STUDENT_TEST_TAKEN_ID);
+                params.put("end_time_status", Const.END_TIME_STATUS);
+                Log.d("ResultScore", "getParams: " + params);
                 return params;
             }
         };
 
-
+        request.setRetryPolicy(new DefaultRetryPolicy(10000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         AppWebService.getInstance(context).addToRequestQueue(request);
 
     }
@@ -324,18 +331,19 @@ public class ResultPannelActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        progressDialog.dismiss();
                         try {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status_code");
                             String message = object.getString("message");
-                            if (status.equalsIgnoreCase("203")){
+                            if (status.equalsIgnoreCase("203")) {
                                 JSONArray countJsonArray = object.getJSONArray("all_count");
                                 JSONObject sectionObject = countJsonArray.getJSONObject(0);
-                                progressBar_section_you.setProgress((int)(sectionObject.getLong("your_marks")));
+                                progressBar_section_you.setProgress((int) (sectionObject.getLong("your_marks")));
                                 progressBar_section_you.setProgressDrawable(getResources().getDrawable(R.drawable.progress_drawable_mark));
-                                progressBar_section_topper.setProgress((int)(sectionObject.getLong("topper_marks")));
+                                progressBar_section_topper.setProgress((int) (sectionObject.getLong("topper_marks")));
                                 progressBar_section_topper.setProgressDrawable(getResources().getDrawable(R.drawable.progress_drawable_mark));
-                                progressBar_section_average.setProgress((int)(sectionObject.getLong("avg_marks")));
+                                progressBar_section_average.setProgress((int) (sectionObject.getLong("avg_marks")));
                                 progressBar_section_average.setProgressDrawable(getResources().getDrawable(R.drawable.progress_drawable_mark));
 
                                 tv_you_section_mark.setText(sectionObject.getString("your_marks"));
@@ -345,9 +353,9 @@ public class ResultPannelActivity extends AppCompatActivity {
                                 JSONArray sectionJsonArray = object.getJSONArray("marks_scored");
                                 resultSectionList.clear();
                                 ResultSectionSetGet resultSectionSetGet;
-                                for (int i = 0; i<sectionJsonArray.length(); i++){
+                                for (int i = 0; i < sectionJsonArray.length(); i++) {
                                     JSONObject object1 = sectionJsonArray.getJSONObject(i);
-                                    resultSectionSetGet=new ResultSectionSetGet();
+                                    resultSectionSetGet = new ResultSectionSetGet();
                                     resultSectionSetGet.setResult_sectional_id(object1.getString("sectional_id"));
                                     resultSectionSetGet.setResult_sectional_name(object1.getString("sectional_name"));
                                     resultSectionList.add(resultSectionSetGet);
@@ -358,13 +366,12 @@ public class ResultPannelActivity extends AppCompatActivity {
                                 JSONArray buttonJsonArray = object.getJSONArray("button");
                                 JSONObject buttonObject = buttonJsonArray.getJSONObject(0);
                                 resultSectionMarkList.clear();
-                                resultSectionMarkList.add(new ResultSectionMarkSetGet( buttonObject.getString("marks"),"Marks"));
-                                resultSectionMarkList.add(new ResultSectionMarkSetGet(buttonObject.getString("correct"),"Correct"));
-                                resultSectionMarkList.add(new ResultSectionMarkSetGet(buttonObject.getString("wrong"),"Wrong"));
+                                resultSectionMarkList.add(new ResultSectionMarkSetGet(buttonObject.getString("marks"), "Marks"));
+                                resultSectionMarkList.add(new ResultSectionMarkSetGet(buttonObject.getString("correct"), "Correct"));
+                                resultSectionMarkList.add(new ResultSectionMarkSetGet(buttonObject.getString("wrong"), "Wrong"));
                                 rv_section_rank.setAdapter(resultSectionMarkAdapter);
 
                             }
-                            progressDialog.hide();
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -373,15 +380,17 @@ public class ResultPannelActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                progressDialog.dismiss();
+                Log.e(TAG, "ERROR : " + error.getLocalizedMessage());
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
                 params.put("test_id", Const.TEST_ID);
+                params.put("test_taken_id", Const.STUDENT_TEST_TAKEN_ID);
                 params.put("student_id", "6");
-                Log.d("TopRankerScore", "getParams: "+params);
+                Log.d("TopRankerScore", "getParams: " + params);
                 return params;
             }
         };
@@ -403,18 +412,18 @@ public class ResultPannelActivity extends AppCompatActivity {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status_code");
                             String message = object.getString("message");
-                            if (status.equalsIgnoreCase("203")){
+                            if (status.equalsIgnoreCase("203")) {
                                 JSONArray jsonArray = object.getJSONArray("marks_scored");
                                 topRankerList.clear();
                                 TopRankerSetGet topRankerSetGet;
                                 cardView_top4.setVisibility(View.VISIBLE);
 
 
-                                if (jsonArray.length()>4){
+                                if (jsonArray.length() > 4) {
                                     tv_view_top_ranker.setVisibility(View.VISIBLE);
-                                    for (int i = 0; i<4; i++){
+                                    for (int i = 0; i < 4; i++) {
                                         JSONObject object1 = jsonArray.getJSONObject(i);
-                                        topRankerSetGet=new TopRankerSetGet();
+                                        topRankerSetGet = new TopRankerSetGet();
                                         topRankerSetGet.setRanker_user_id(object1.getString("user_id"));
                                         topRankerSetGet.setRanker_user_name(object1.getString("user_name"));
                                         topRankerSetGet.setRanker_user_img(object1.getString("user_img"));
@@ -422,10 +431,10 @@ public class ResultPannelActivity extends AppCompatActivity {
                                         topRankerSetGet.setRanker_total_marks(object1.getString("total_marks"));
                                         topRankerList.add(topRankerSetGet);
                                     }
-                                }else {
-                                    for (int i = 0; i<jsonArray.length(); i++){
+                                } else {
+                                    for (int i = 0; i < jsonArray.length(); i++) {
                                         JSONObject object1 = jsonArray.getJSONObject(i);
-                                        topRankerSetGet=new TopRankerSetGet();
+                                        topRankerSetGet = new TopRankerSetGet();
                                         topRankerSetGet.setRanker_user_id(object1.getString("user_id"));
                                         topRankerSetGet.setRanker_user_name(object1.getString("user_name"));
                                         topRankerSetGet.setRanker_user_img(object1.getString("user_img"));
@@ -438,7 +447,7 @@ public class ResultPannelActivity extends AppCompatActivity {
                                 }
                                 topRankerAdapter = new TopRankerAdapter(context, topRankerList);
                                 rv_top_rankers.setAdapter(topRankerAdapter);
-                            }else {
+                            } else {
                                 cardView_top4.setVisibility(View.GONE);
                             }
 
@@ -452,13 +461,13 @@ public class ResultPannelActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
 
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
                 params.put("test_id", Const.TEST_ID);
                 params.put("student_id", "6");
-                Log.d("TopRanker", "getParams: "+params);
+                Log.d("TopRanker", "getParams: " + params);
                 return params;
             }
         };

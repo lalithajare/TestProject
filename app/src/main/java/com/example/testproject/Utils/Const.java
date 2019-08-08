@@ -22,14 +22,15 @@ public class Const {
     public static String TOPIC_NAME = "";
     public static int TOPIC_SIZE = 0;
     public static String TOTAL_QUIZ_QUES = "";
-    public static String ANSWER_ID = "";
+    //    public static String ANSWER_ID = "";
     public static String QUES_STATUS = "";
     public static int QUIZ_LENGTH = 0;
-    public static String CHOOSE_QUESTION_ID = "";
+    //    public static String CHOOSE_QUESTION_ID = "";
     public static String TYPE_NAME = "";
     public static String END_TIME = "";
     public static String TYPE_ID = "";
     public static String STUDENT_TEST_ID = "";
+    public static String STUDENT_TEST_TAKEN_ID = "";
     public static String STUDENT_STATUS = "";
     public static String CATEGORY_NAME = "";
     public static String CATEGORY_ID = "";
