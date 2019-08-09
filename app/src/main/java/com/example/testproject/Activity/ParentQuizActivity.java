@@ -628,6 +628,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
                 params.put("test_taken_id", Const.STUDENT_TEST_TAKEN_ID);
+                params.put("test_id", quiz_id);
                 params.put("student_id", "6");
                 Log.d("FinishTest", "getParams: " + params);
                 return params;

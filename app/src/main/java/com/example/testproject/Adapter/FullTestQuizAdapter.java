@@ -67,40 +67,40 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
             holder.btn_start_quiz.setText("Coming Soon");
             holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
             holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.resume_test_unlock_back_color));
-        } else if (freeTests.get(position).getTest_status().equalsIgnoreCase("1") &&
-                freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")) {
+        } else if (freeTests.get(position).getTest_status().equalsIgnoreCase("1") /*&&
+                freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")*/) {
             holder.iv_lock.setVisibility(View.VISIBLE);
 
-            if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("0")) {
-                holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
-                holder.btn_start_quiz.setText("Start Test");
-                holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
-                holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.start_test_unlock_back_color));
-
-            } else {
+//            if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("0")) {
+//                holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
+//                holder.btn_start_quiz.setText("Start Test");
+//                holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
+//                holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.start_test_unlock_back_color));
+//
+//            } else {
                 holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
                 holder.btn_start_quiz.setText("View Analysis");
                 holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
                 holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.unlock_back_color));
 
-            }
+//            }
 
         } else if (freeTests.get(position).getTest_status().equalsIgnoreCase("1")) {
             holder.iv_lock.setVisibility(View.VISIBLE);
-            if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("0")) {
+           /* if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("0")) {
                 holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
                 holder.btn_start_quiz.setText("Start Test");
                 holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
                 holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.start_test_unlock_back_color));
 
-            } else {
+            } else {*/
                 holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
                 holder.btn_start_quiz.setText("View Analysis");
                 holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
                 holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.unlock_back_color));
 
-            }
-        } else if (freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")) {
+//            }
+        } /*else if (freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")) {
             holder.iv_lock.setVisibility(View.VISIBLE);
             if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("0")) {
                 holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
@@ -115,7 +115,7 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
                 holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.unlock_back_color));
 
             }
-        } else {
+        } */else {
             holder.iv_lock.setVisibility(View.VISIBLE);
             holder.iv_lock.setBackgroundResource(R.drawable.ic_lock_icon);
             holder.btn_start_quiz.setText("Unlock");
@@ -153,10 +153,10 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
         if (freeTests.get(position).getTest_status().equalsIgnoreCase("2")) {
             Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show();
 
-        } else if (freeTests.get(position).getTest_status().equalsIgnoreCase("1") &&
-                freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")) {
+        } else if (freeTests.get(position).getTest_status().equalsIgnoreCase("1") /*&&
+                freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")*/) {
             Const.STUDENT_TEST_ID = freeTests.get(position).getStudent_test_taken_id();
-            if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") && !wasPaused) {
+            if (/*freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") &&*/ !wasPaused) {
                 Intent intent = new Intent(context, ResultPannelActivity.class);
                 Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
                 Const.END_TIME_STATUS = "0";
@@ -181,7 +181,7 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
 
         } else if (freeTests.get(position).getTest_status().equalsIgnoreCase("1")) {
             Const.STUDENT_TEST_ID = freeTests.get(position).getStudent_test_taken_id();
-            if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") && !wasPaused) {
+            if (/*freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") &&*/ !wasPaused) {
                 Intent intent = new Intent(context, ResultPannelActivity.class);
                 Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
                 Const.END_TIME_STATUS = "0";
@@ -204,7 +204,7 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
                 context.startActivity(intent);
 
             }
-        } else if (freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")) {
+        } /*else if (freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")) {
             Const.STUDENT_TEST_ID = freeTests.get(position).getStudent_test_taken_id();
             if (freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") && !wasPaused) {
                 Intent intent = new Intent(context, ResultPannelActivity.class);
@@ -229,7 +229,7 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
                 context.startActivity(intent);
 
             }
-        } else {
+        }*/ else {
             Toast.makeText(context, "Buy Plan", Toast.LENGTH_SHORT).show();
         }
     }

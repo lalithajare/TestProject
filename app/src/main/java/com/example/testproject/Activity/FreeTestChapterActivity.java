@@ -60,6 +60,7 @@ public class FreeTestChapterActivity extends AppCompatActivity {
     List<SectionSetGet> sectionList = new ArrayList<>();
     RecyclerView free_test_section;
     public static FullTestQuizAdapter testAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,13 +73,13 @@ public class FreeTestChapterActivity extends AppCompatActivity {
         toolbar_title = findViewById(R.id.toolbar_title);
         toolbar_title.setText(Const.CATEGORY_NAME);
         recyclerView = findViewById(R.id.free_test_recycle);
-        free_test_section=findViewById(R.id.free_test_section);
-        relativeLayout=findViewById(R.id.relativeLayout);
+        free_test_section = findViewById(R.id.free_test_section);
+        relativeLayout = findViewById(R.id.relativeLayout);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(manager);
         recyclerView.setHasFixedSize(true);
         ViewCompat.setNestedScrollingEnabled(recyclerView, false);
-        av_courses_loader =findViewById(R.id.av_courses_loader);
+        av_courses_loader = findViewById(R.id.av_courses_loader);
         noDataImage = findViewById(R.id.no_data_image);
         av_courses_loader.setVisibility(View.GONE);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -89,10 +90,10 @@ public class FreeTestChapterActivity extends AppCompatActivity {
         });
         if (InternetCheck.isInternetOn(context)) {
             getFullTest(Const.CATEGORY_ID);
-        }else {
+        } else {
             Toast.makeText(context, "No internet", Toast.LENGTH_LONG).show();
         }
-        swipe_container= findViewById(R.id.swipe_container);
+        swipe_container = findViewById(R.id.swipe_container);
         swipe_container.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -106,21 +107,24 @@ public class FreeTestChapterActivity extends AppCompatActivity {
         layoutManager_section_topic = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
         free_test_section.setLayoutManager(layoutManager_section_topic);
     }
+
     @Override
     protected void onStart() {
         super.onStart();
         getFullTest(Const.CATEGORY_ID);
     }
+
+
     private void getFullTest(final String categoryId) {
         noDataImage.setVisibility(View.GONE);
         av_courses_loader.setVisibility(View.GONE);
-        final Dialog dialog=new Dialog(context);
+        final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.full_screen_progress_bar);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.setCancelable(true);
         dialog.show();
-        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ, new Response.Listener<String>() {
+        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ_TEST, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -129,38 +133,38 @@ public class FreeTestChapterActivity extends AppCompatActivity {
                     String message = object.getString("message");
                     //Const.STUDENT_STATUS=object.getString("student_status");
                     Log.e("onResponse: ", status);
-                    if (status.equalsIgnoreCase("200")){
+                    if (status.equalsIgnoreCase("200")) {
                         JSONArray jsonArray = object.getJSONArray("question_list");
                         freeTests.clear();
                         TestQuizSetGet testQuizSetGet;
-                        for (int i = 0; i<jsonArray.length(); i++){
+                        for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject object1 = jsonArray.getJSONObject(i);
-                            testQuizSetGet=new TestQuizSetGet();
+                            testQuizSetGet = new TestQuizSetGet();
                             testQuizSetGet.setTest_quiz_id(object1.getString("quiz_id"));
                             testQuizSetGet.setTest_quiz_name(object1.getString("quiz_name"));
-                            testQuizSetGet.setTest_direction_status(object1.getString("Direction Status"));
+//                            testQuizSetGet.setTest_direction_status(object1.getString("Direction Status"));
                             testQuizSetGet.setTest_no_of_qs(object1.getString("no_of_qs"));
                             testQuizSetGet.setTest_time(object1.getString("time"));
                             testQuizSetGet.setTest_total_marks(object1.getString("total_marks"));
                             testQuizSetGet.setTest_changable(object1.getString("changable"));
                             testQuizSetGet.setTest_status(object1.getString("status"));
-                            testQuizSetGet.setTest_checked_attended(object1.getString("checked_attended"));
-                            testQuizSetGet.setRemaining_time(object1.getString("remaining_time"));
+//                            testQuizSetGet.setTest_checked_attended(object1.getString("checked_attended"));
+//                            testQuizSetGet.setRemaining_time(object1.getString("remaining_time"));
                             testQuizSetGet.setStudent_test_taken_id(object1.getString("student_test_taken_id"));
-                            testQuizSetGet.setStudent_buy_plan_status(object1.getString("student_buy_plan_status"));
-                            JSONArray testPatternArray = object1.getJSONArray("Sectional Pattern");
+//                            testQuizSetGet.setStudent_buy_plan_status(object1.getString("student_buy_plan_status"));
+//                            JSONArray testPatternArray = object1.getJSONArray("Sectional Pattern");
                             //patternArrayList.clear();
                             patternArrayList = new ArrayList<>();
-                            if(testPatternArray != null ){
-                                for (int j=0; j<testPatternArray.length(); j++){
-                                    JSONObject testPatternObject = testPatternArray.getJSONObject(j);
-                                    TestPattern testPattern =new TestPattern();
-                                    testPattern.setSection_name(testPatternObject.getString("section_name"));
-                                    testPattern.setCorrect_mark(testPatternObject.getString("correct_mark"));
-                                    testPattern.setNegetive_mark(testPatternObject.getString("negetive_mark"));
-                                    patternArrayList.add(testPattern);
-                                }
-                            }
+//                            if (testPatternArray != null) {
+//                                for (int j = 0; j < testPatternArray.length(); j++) {
+//                                    JSONObject testPatternObject = testPatternArray.getJSONObject(j);
+//                                    TestPattern testPattern = new TestPattern();
+//                                    testPattern.setSection_name(testPatternObject.getString("section_name"));
+//                                    testPattern.setCorrect_mark(testPatternObject.getString("correct_mark"));
+//                                    testPattern.setNegetive_mark(testPatternObject.getString("negetive_mark"));
+//                                    patternArrayList.add(testPattern);
+//                                }
+//                            }
                             freeTests.add(testQuizSetGet);
                         }
                         noDataImage.setVisibility(View.GONE);
@@ -169,7 +173,7 @@ public class FreeTestChapterActivity extends AppCompatActivity {
 
                         testAdapter = new FullTestQuizAdapter(context, freeTests);
                         recyclerView.setAdapter(testAdapter);
-                    }else {
+                    } else {
                         noDataImage.setVisibility(View.VISIBLE);
                         recyclerView.setVisibility(View.GONE);
                     }
@@ -187,15 +191,15 @@ public class FreeTestChapterActivity extends AppCompatActivity {
                 recyclerView.setVisibility(View.GONE);
                 dialog.dismiss();
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new Hashtable<>();
-                params.put("category_id", categoryId);
+                params.put("category_id", Const.CATEGORY_ID);
                 params.put("student_id", "6");
-                params.put("section_id",Const.SECTION_ID);
-                params.put("question_year_stat","0");
-                Log.d("category_id", "getParams: "+params);
+                params.put("section_id", Const.SECTION_ID);
+                params.put("question_year_stat", "0");
+                Log.d("category_id", "getParams: " + params);
                 return params;
             }
         };
@@ -209,10 +213,10 @@ public class FreeTestChapterActivity extends AppCompatActivity {
 
     private void populatesectionList() {
         sectionList.clear();
-        sectionList.add(new SectionSetGet("All ("+ Const.ALL +" Tests)"));
-        sectionList.add(new SectionSetGet("Full Length ("+ Const.FULL_LENGTH +" Tests)"));
-        sectionList.add(new SectionSetGet("Sectional ("+ Const.SECTIONAL +" Tests)"));
-        sectionList.add(new SectionSetGet("Previous Year ("+ Const.PREV_YEAR +" Tests)"));
+        sectionList.add(new SectionSetGet("All (" + Const.ALL + " Tests)"));
+        sectionList.add(new SectionSetGet("Full Length (" + Const.FULL_LENGTH + " Tests)"));
+        sectionList.add(new SectionSetGet("Sectional (" + Const.SECTIONAL + " Tests)"));
+        sectionList.add(new SectionSetGet("Previous Year (" + Const.PREV_YEAR + " Tests)"));
         free_test_section.setAdapter(testSectionAdapter);
         testSectionAdapter.notifyDataSetChanged();
     }

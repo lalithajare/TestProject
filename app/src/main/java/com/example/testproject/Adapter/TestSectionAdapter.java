@@ -100,7 +100,7 @@ public class TestSectionAdapter extends RecyclerView.Adapter<TestSectionAdapter.
         dialog.show();
         recyclerView.setVisibility(View.GONE);
         noDataImage.setVisibility(View.GONE);
-        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ, new Response.Listener<String>() {
+        StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_QUIZ_TEST, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {

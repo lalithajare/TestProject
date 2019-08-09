@@ -17,7 +17,6 @@ public class Const {
     public static String SECTIONAL = "";
     public static String FULL_LENGTH = "";
     public static String ALL = "";
-    public static String SECTION_ID = "";
     public static String TEST_TIME = "";
     public static String TOPIC_NAME = "";
     public static int TOPIC_SIZE = 0;
@@ -32,8 +31,11 @@ public class Const {
     public static String STUDENT_TEST_ID = "";
     public static String STUDENT_TEST_TAKEN_ID = "";
     public static String STUDENT_STATUS = "";
+
     public static String CATEGORY_NAME = "";
     public static String CATEGORY_ID = "";
+    public static String SECTION_ID = "";
+
     public static ArrayList<TestPattern> patternArrayList;
 
 }
