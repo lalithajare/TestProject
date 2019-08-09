@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
@@ -293,7 +294,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                 dialog.dismiss();
                 topicList.clear();
                 strings.clear();
-                Const.STUDENT_TEST_TAKEN_ID = mQuizOfflineStateHandler.getmQuizAllQuestionTopicWiseResponseSchema().getTestTakenId();
+//                Const.STUDENT_TEST_TAKEN_ID = mQuizOfflineStateHandler.getmQuizAllQuestionTopicWiseResponseSchema().getTestTakenId();
                 if (wasPaused) {
                     resumeTime();
                     getSavedOfflineAttempts();
@@ -589,6 +590,7 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
         progressDialog.show();
         StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_SECTION_MARK,
                 new Response.Listener<String>() {
+                    @SuppressLint("StaticFieldLeak")
                     @Override
                     public void onResponse(String response) {
                         progressDialog.hide();
@@ -599,17 +601,26 @@ abstract public class ParentQuizActivity extends AppCompatActivity {
                             Log.d("MarkSection", "onResponse: " + status);
 
                             if (status.equalsIgnoreCase("203")) {
-                                Intent intent = new Intent(mContext, ResultPannelActivity.class);
-                                startActivity(intent);
-//                                new Handler().post(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        AppPreferenceManager.deleteQuizState(quiz_id);
-//                                        deleteQuizFromDB();
-//                                        finish();
-//                                    }
-//                                });
-                                finish();
+                                new AsyncTask<Void, Void, Void>() {
+                                    @Override
+                                    protected Void doInBackground(Void... voids) {
+                                        try {
+                                            AppPreferenceManager.deleteQuizState(quiz_id);
+                                            deleteQuizFromDB();
+                                        } catch (Exception ex) {
+                                            Log.e(TAG, ex.toString());
+                                        }
+                                        return null;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(Void aVoid) {
+                                        super.onPostExecute(aVoid);
+                                        Intent intent = new Intent(mContext, ResultPannelActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                }.execute();
                             } else if (!TextUtils.isEmpty(message)) {
                                 UtilFunctions.showToast(message);
                             }

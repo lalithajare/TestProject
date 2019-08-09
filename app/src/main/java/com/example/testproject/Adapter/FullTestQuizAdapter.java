@@ -78,10 +78,10 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
 //                holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.start_test_unlock_back_color));
 //
 //            } else {
-                holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
-                holder.btn_start_quiz.setText("View Analysis");
-                holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
-                holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.unlock_back_color));
+            holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
+            holder.btn_start_quiz.setText("View Analysis");
+            holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
+            holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.unlock_back_color));
 
 //            }
 
@@ -94,10 +94,10 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
                 holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.start_test_unlock_back_color));
 
             } else {*/
-                holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
-                holder.btn_start_quiz.setText("View Analysis");
-                holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
-                holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.unlock_back_color));
+            holder.iv_lock.setBackgroundResource(R.drawable.ic_unlock_icon);
+            holder.btn_start_quiz.setText("View Analysis");
+            holder.btn_start_quiz.setTextColor(context.getResources().getColor(R.color.white));
+            holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.unlock_back_color));
 
 //            }
         } /*else if (freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")) {
@@ -115,7 +115,7 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
                 holder.btn_start_quiz.setBackground(context.getResources().getDrawable(R.drawable.unlock_back_color));
 
             }
-        } */else {
+        } */ else {
             holder.iv_lock.setVisibility(View.VISIBLE);
             holder.iv_lock.setBackgroundResource(R.drawable.ic_lock_icon);
             holder.btn_start_quiz.setText("Unlock");
@@ -150,17 +150,37 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
     }
 
     private void startQuiz(int position, boolean wasPaused) {
+        Const.STUDENT_TEST_TAKEN_ID = freeTests.get(position).getStudent_test_taken_id();
+        Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
+        Const.STUDENT_TEST_ID = freeTests.get(position).getTest_quiz_id();
+        Const.END_TIME = freeTests.get(position).getTest_time();
+
         if (freeTests.get(position).getTest_status().equalsIgnoreCase("2")) {
             Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show();
 
         } else if (freeTests.get(position).getTest_status().equalsIgnoreCase("1") /*&&
                 freeTests.get(position).getStudent_buy_plan_status().equalsIgnoreCase("1")*/) {
-            Const.STUDENT_TEST_ID = freeTests.get(position).getStudent_test_taken_id();
             if (/*freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") &&*/ !wasPaused) {
-                Intent intent = new Intent(context, ResultPannelActivity.class);
-                Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
+                /*Intent intent = new Intent(context, ResultPannelActivity.class);
                 Const.END_TIME_STATUS = "0";
+                context.startActivity(intent);*/
+
+                //Remove this
+                Intent intent = new Intent(context, TestInstructionActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("quiz_id", freeTests.get(position).getTest_quiz_id());
+                intent.putExtra("was_paused", wasPaused);
+                intent.putExtra("quiz_name", freeTests.get(position).getTest_quiz_name());
+                intent.putExtra("total_time", freeTests.get(position).getTest_time());
+                intent.putExtra("remain_time", freeTests.get(position).getRemaining_time());
+                intent.putExtra("changable", freeTests.get(position).getTest_changable());
+                intent.putExtra("total_question", freeTests.get(position).getTest_no_of_qs());
+                intent.putExtra("direction", freeTests.get(position).getTest_direction_status());
+                intent.putExtra("total_marks", freeTests.get(position).getTest_total_marks());
+                Const.END_TIME_STATUS = "1";
                 context.startActivity(intent);
+                //Remove this
+
             } else {
                 Intent intent = new Intent(context, TestInstructionActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -173,24 +193,36 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
                 intent.putExtra("total_question", freeTests.get(position).getTest_no_of_qs());
                 intent.putExtra("direction", freeTests.get(position).getTest_direction_status());
                 intent.putExtra("total_marks", freeTests.get(position).getTest_total_marks());
-                Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
                 Const.END_TIME_STATUS = "1";
                 context.startActivity(intent);
 
             }
 
         } else if (freeTests.get(position).getTest_status().equalsIgnoreCase("1")) {
-            Const.STUDENT_TEST_ID = freeTests.get(position).getStudent_test_taken_id();
             if (/*freeTests.get(position).getTest_checked_attended().equalsIgnoreCase("1") &&*/ !wasPaused) {
-                Intent intent = new Intent(context, ResultPannelActivity.class);
-                Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
+                /*Intent intent = new Intent(context, ResultPannelActivity.class);
                 Const.END_TIME_STATUS = "0";
+                context.startActivity(intent);*/
+
+                //Remove this
+                Intent intent = new Intent(context, TestInstructionActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("quiz_id", freeTests.get(position).getTest_quiz_id());
+                intent.putExtra("was_paused", wasPaused);
+                intent.putExtra("quiz_name", freeTests.get(position).getTest_quiz_name());
+                intent.putExtra("total_time", freeTests.get(position).getTest_time());
+                intent.putExtra("remain_time", freeTests.get(position).getRemaining_time());
+                intent.putExtra("changable", freeTests.get(position).getTest_changable());
+                intent.putExtra("total_question", freeTests.get(position).getTest_no_of_qs());
+                intent.putExtra("direction", freeTests.get(position).getTest_direction_status());
+                intent.putExtra("total_marks", freeTests.get(position).getTest_total_marks());
+                Const.END_TIME_STATUS = "1";
                 context.startActivity(intent);
+                //Remove this
 
             } else {
                 Intent intent = new Intent(context, TestInstructionActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                Const.TEST_ID = freeTests.get(position).getTest_quiz_id();
                 Const.END_TIME_STATUS = "1";
                 intent.putExtra("quiz_id", freeTests.get(position).getTest_quiz_id());
                 intent.putExtra("was_paused", wasPaused);
@@ -231,6 +263,22 @@ public class FullTestQuizAdapter extends RecyclerView.Adapter<FullTestQuizAdapte
             }
         }*/ else {
             Toast.makeText(context, "Buy Plan", Toast.LENGTH_SHORT).show();
+
+            //Remove this
+            Intent intent = new Intent(context, TestInstructionActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("quiz_id", freeTests.get(position).getTest_quiz_id());
+            intent.putExtra("was_paused", wasPaused);
+            intent.putExtra("quiz_name", freeTests.get(position).getTest_quiz_name());
+            intent.putExtra("total_time", freeTests.get(position).getTest_time());
+            intent.putExtra("remain_time", freeTests.get(position).getRemaining_time());
+            intent.putExtra("changable", freeTests.get(position).getTest_changable());
+            intent.putExtra("total_question", freeTests.get(position).getTest_no_of_qs());
+            intent.putExtra("direction", freeTests.get(position).getTest_direction_status());
+            intent.putExtra("total_marks", freeTests.get(position).getTest_total_marks());
+            Const.END_TIME_STATUS = "1";
+            context.startActivity(intent);
+            //Remove this
         }
     }
 

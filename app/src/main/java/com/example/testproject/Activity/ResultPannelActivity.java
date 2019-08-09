@@ -235,6 +235,8 @@ public class ResultPannelActivity extends AppCompatActivity {
                 params.put("test_id", Const.TEST_ID);
                 params.put("test_taken_id", Const.STUDENT_TEST_TAKEN_ID);
                 params.put("student_id", "6");
+                params.put("test_end_time", Const.END_TIME);
+                params.put("end_time_status", Const.END_TIME_STATUS);
                 Log.d("OverALlResult", "getParams: " + params);
                 return params;
             }
