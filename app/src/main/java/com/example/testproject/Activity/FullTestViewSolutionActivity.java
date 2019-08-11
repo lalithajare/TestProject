@@ -257,7 +257,7 @@ public class FullTestViewSolutionActivity extends AppCompatActivity {
         });
     }
 
-    private void getFullTestTopic() {
+    private void    getFullTestTopic() {
         noDataImage.setVisibility(View.GONE);
         tryAgainText.setVisibility(View.GONE);
         StringRequest request = new StringRequest(Request.Method.POST, UrlsAvision.URL_FULL_LENGTH_TOPIC_LIST, new Response.Listener<String>() {
